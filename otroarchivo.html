@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otro Archivo</title>
+</head>
+<body>
+    <h1>Otro Archivo</h1>
+    <p>Este es otro archivo HTML.</p>
+
+    <script>
+        // Función para obtener el color de fondo del localStorage y aplicarlo
+        function setColorFromLocalStorage() {
+            var color = localStorage.getItem('backgroundColor');
+            if (color) {
+                document.body.style.backgroundColor = color;
+            }
+        }
+
+        // Función para recargar la página cada 5 segundos
+        setInterval(function() {
+            location.reload();
+        }, 50); // 50 milisegundos = 5 segundos
+
+        // Llamar a la función al cargar la página
+        setColorFromLocalStorage();
+    </script>
+</body>
+</html>
