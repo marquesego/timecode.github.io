@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+</head>
+<body>
+    <h1>Página Principal</h1>
+    <button onclick="cambiarColorFondo('blue')">Cambiar color de fondo a azul</button>
+    <button onclick="cambiarColorFondo('green')">Cambiar color de fondo a verde</button>
+
+    <script>
+        function cambiarColorFondo(color) {
+            localStorage.setItem('backgroundColor', color);
+            window.open('otroarchivo.html', '_blank');
+        }
+    </script>
+</body>
+</html>
