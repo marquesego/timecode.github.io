@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time EDL Generator with Camera Streaming</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .active {
+            background-color: red;
+            color: white;
+        }
+        #log {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        #timecode {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        canvas {
+            border: 6px solid black;
+            margin-top: 10px;
+        }
+        .active-stream {
+            border-color: red; /* Añade un borde rojo al canvas activo */
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time EDL Generator with Camera Streaming</h1>
+    <select id="cameraSelect1">
+        <option value="">Select Camera 1</option>
+    </select>
+    <select id="cameraSelect2">
+        <option value="">Select Camera 2</option>
+    </select>
+    <br><br>
+    <button id="startButton">Start Streaming</button>
+    <button id="clearLocalStorageButton" style="color: red;">Clear All and Restart</button>
+    <br><br>
+    <canvas id="canvas1" width="640" height="480"></canvas>
+    <canvas id="canvas2" width="640" height="480"></canvas>
+    <br><br>
+    <button id="clip1Btn" onclick="selectClip('Clip1', 'clip1Btn')">Clip 1</button>
+    <button id="clip2Btn" onclick="selectClip('Clip2', 'clip2Btn')">Clip 2</button>
+    <button id="clip3Btn" onclick="selectClip('Clip3', 'clip3Btn')">Clip 3</button>
+    <button id="clip4Btn" onclick="selectClip('Clip4', 'clip4Btn')">Clip 4</button>
+    <button onclick="generateEDL()">Generate EDL</button>
+    <div id="timecode"></div>
+    <div id="log"></div>
+
+    <script>
+        let clips = JSON.parse(localStorage.getItem('clips')) || [];
+        let currentClip = null;
+        let currentStream1 = null; // Almacenar el stream actual de la cámara 1
+        let currentStream2 = null; // Almacenar el stream actual de la cámara 2
+
+        function updateTimecode() {
+            document.getElementById('timecode').textContent = `Current Timecode: ${getTimecode()}`;
+        }
+
+        function getTimecode() {
+            let now = new Date();
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
+            let frames = Math.floor(now.getMilliseconds() / 40).toString().padStart(2, '0'); // Approximately 25 fps
+            return `${hours}:${minutes}:${seconds}:${frames}`;
+        }
+
+        function selectClip(clipName, buttonId) {
+            let currentTimecode = getTimecode();
+
+            if (currentClip) {
+                currentClip.endTime = currentTimecode;
+                clips.push(currentClip);
+                logEvent(`Added ${currentClip.name} from ${currentClip.startTime} to ${currentClip.endTime}`);
+                currentClip = { name: clipName, startTime: currentTimecode, endTime: null };
+            } else {
+                currentClip = { name: clipName, startTime: currentTimecode, endTime: null };
+                logEvent(`Started ${clipName} at ${currentTimecode}`);
+            }
+
+            localStorage.setItem('clips', JSON.stringify(clips));
+            updateButtonStyles(buttonId);
+
+            // Actualizar el estilo del stream activo
+            updateActiveStream();
+        }
+
+        function logEvent(message) {
+            let logDiv = document.getElementById('log');
+            logDiv.textContent += message + '\n';
+        }
+
+        function generateEDL() {
+            if (currentClip && !currentClip.endTime) {
+                logEvent(`Warning: The last clip ${currentClip.name} has no end time and will not be included in the EDL.`);
+            }
+
+            let edlText = "TITLE: LIVE_EDL\nFCM: NON-DROP FRAME\n\n";
+            let sequenceStart = '00:00:00:00';
+            let sequenceEnd = sequenceStart;
+
+            clips.forEach((clip, index) => {
+                let clipDuration = calculateDuration(clip.startTime, clip.endTime);
+
+                if (clipDuration === '00:00:00:00') {
+                    logEvent(`Warning: Skipping clip ${clip.name} due to zero duration.`);
+                    return;
+                }
+
+                sequenceEnd = addTimecode(sequenceStart, clipDuration);
+                edlText += `${index + 1}  ${clip.name}    V  C       ${clip.startTime} ${clip.endTime} ${sequenceStart} ${sequenceEnd}\n`;
+                sequenceStart = sequenceEnd;
+            });
+
+            download('output.edl', edlText);
+        }
+
+        function calculateDuration(startTime, endTime) {
+            let start = timeStringToMilliseconds(startTime);
+            let end = timeStringToMilliseconds(endTime);
+            let duration = end - start;
+
+            if (duration <= 0) {
+                return '00:00:00:00';
+            }
+
+            return millisecondsToTimecode(duration);
+        }
+
+        function timeStringToMilliseconds(timeString) {
+            let [hours, minutes, seconds, frames] = timeString.split(':').map(Number);
+            let totalMilliseconds = (hours * 3600 + minutes * 60 + seconds) * 1000 + frames * 40; // Convert frames to milliseconds (25fps)
+            return totalMilliseconds;
+        }
+
+        function millisecondsToTimecode(milliseconds) {
+            let totalSeconds = milliseconds / 1000;
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = Math.floor(totalSeconds % 60);
+            let frames = Math.floor((milliseconds % 1000) / 40); // Convert milliseconds to frames (25fps)
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
+        }
+
+        function addTimecode(baseTimecode, durationTimecode) {
+            let baseMilliseconds = timeStringToMilliseconds(baseTimecode);
+            let durationMilliseconds = timeStringToMilliseconds(durationTimecode);
+            let totalMilliseconds = baseMilliseconds + durationMilliseconds;
+            return millisecondsToTimecode(totalMilliseconds);
+        }
+
+        function download(filename, text) {
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            document.body.appendChild(element);
+            element.click();
+        }
+
+        document.getElementById('startButton').addEventListener('click', startStream);
+        document.getElementById('clearLocalStorageButton').addEventListener('click', clearLocalStorage);
+
+        async function startStream() {
+            try {
+                const cameraSelect1 = document.getElementById('cameraSelect1').value;
+                const cameraSelect2 = document.getElementById('cameraSelect2').value;
+
+                const constraints1 = {
+                    video: { deviceId: cameraSelect1 ? { exact: cameraSelect1 } : undefined }
+                };
+
+                const constraints2 = {
+                    video: { deviceId: cameraSelect2 ? { exact: cameraSelect2 } : undefined }
+                };
+
+                const stream1 = await navigator.mediaDevices.getUserMedia(constraints1);
+                const stream2 = await navigator.mediaDevices.getUserMedia(constraints2);
+
+                const video1 = document.createElement('video');
+                video1.srcObject = stream1;
+                video1.play();
+                video1.id = 'video1';
+
+                const video2 = document.createElement('video');
+                video2.srcObject = stream2;
+                video2.play();
+                video2.id = 'video2';
+
+                const canvas1 = document.getElementById('canvas1');
+                const context1 = canvas1.getContext('2d');
+                video1.addEventListener('play', function () {
+                    draw(video1, context1, canvas1.width, canvas1.height);
+                });
+
+                const canvas2 = document.getElementById('canvas2');
+                const context2 = canvas2.getContext('2d');
+                video2.addEventListener('play', function () {
+                    draw(video2, context2, canvas2.width, canvas2.height);
+                });
+
+                // Almacenar los streams actuales de las cámaras
+                currentStream1 = stream1;
+                currentStream2 = stream2;
+
+                // Limpiar el borde rojo al iniciar el streaming
+                clearRedBorder();
+           
+            } catch (error) {
+                console.error("Error accessing camera: ", error);
+            }
+        }
+
+        function draw(video, context, width, height) {
+            context.clearRect(0, 0, width, height);
+            context.drawImage(video, 0, 0, width, height);
+
+            requestAnimationFrame(function () {
+                draw(video, context, width, height);
+            });
+        }
+
+        async function startCamera() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+
+                const cameraSelect1 = document.getElementById('cameraSelect1');
+                const cameraSelect2 = document.getElementById('cameraSelect2');
+
+                devices.forEach(device => {
+                    if (device.kind === 'videoinput') {
+                        const option1 = document.createElement('option');
+                        option1.value = device.deviceId;
+                        option1.text = device.label || `Camera ${cameraSelect1.options.length + 1}`;
+                        cameraSelect1.appendChild(option1);
+
+                        const option2 = document.createElement('option');
+                        option2.value = device.deviceId;
+                        option2.text = device.label || `Camera ${cameraSelect2.options.length + 1}`;
+                        cameraSelect2.appendChild(option2);
+                    }
+                });
+            } catch (error) {
+                console.error('Error enumerating devices:', error);
+            }
+        }
+
+        function updateButtonStyles(activeButtonId) {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (button.id === activeButtonId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        function clearLocalStorage() {
+            if (confirm('Are you sure you want to clear all data and restart?')) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+
+        function updateActiveStream() {
+            // Limpiar el borde rojo de ambos streams
+            clearRedBorder();
+
+            // Añadir el borde rojo al canvas activo
+            if (currentClip && currentClip.name === 'Clip1') {
+                document.getElementById('canvas1').classList.add('active-stream');
+            } else if (currentClip && currentClip.name === 'Clip2') {
+                document.getElementById('canvas2').classList.add('active-stream');
+            }
+        }
+
+        function clearRedBorder() {
+            const canvases = document.querySelectorAll('canvas');
+            canvases.forEach(canvas => {
+                canvas.classList.remove('active-stream');
+            });
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === '1') {
+                document.getElementById('clip1Btn').click();
+            } else if (event.key === '2') {
+                document.getElementById('clip2Btn').click();
+            } else if (event.key === '3') {
+                document.getElementById('clip3Btn').click();
+            } else if (event.key === '4') {
+                document.getElementById('clip4Btn').click();
+            }
+        });
+
+        setInterval(updateTimecode, 40); // Update every 40 milliseconds (approximately 25 fps)
+
+        function restorePreviousState() {
+            const savedClips = JSON.parse(localStorage.getItem('clips')) || [];
+            savedClips.forEach(clip => {
+                logEvent(`Restored ${clip.name} from ${clip.startTime} to ${clip.endTime}`);
+                clips.push(clip);
+            });
+        }
+
+        startCamera();
+        restorePreviousState();
+    </script>
+</body>
+</html>
