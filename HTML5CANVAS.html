@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Selectable Cameras with HTML5 Canvas</title>
+</head>
+<body>
+    <select id="cameraSelect1">
+        <option value="">Selecciona la cámara 1</option>
+    </select>
+    <select id="cameraSelect2">
+        <option value="">Selecciona la cámara 2</option>
+    </select>
+    <br><br>
+    <button id="startButton">Iniciar Streaming</button>
+    <br><br>
+    <canvas id="canvas1" width="640" height="480"></canvas>
+    <canvas id="canvas2" width="640" height="480"></canvas>
+
+    <script>
+        async function startStream() {
+            try {
+                const cameraSelect1 = document.getElementById('cameraSelect1').value;
+                const cameraSelect2 = document.getElementById('cameraSelect2').value;
+
+                const constraints1 = {
+                    video: { deviceId: cameraSelect1 ? { exact: cameraSelect1 } : undefined }
+                };
+
+                const constraints2 = {
+                    video: { deviceId: cameraSelect2 ? { exact: cameraSelect2 } : undefined }
+                };
+
+                const stream1 = await navigator.mediaDevices.getUserMedia(constraints1);
+                const stream2 = await navigator.mediaDevices.getUserMedia(constraints2);
+
+                const video1 = document.createElement('video');
+                video1.srcObject = stream1;
+                video1.play();
+
+                const video2 = document.createElement('video');
+                video2.srcObject = stream2;
+                video2.play();
+
+                const canvas1 = document.getElementById('canvas1');
+                const context1 = canvas1.getContext('2d');
+                video1.addEventListener('play', function () {
+                    draw(video1, context1, canvas1.width, canvas1.height);
+                });
+
+                const canvas2 = document.getElementById('canvas2');
+                const context2 = canvas2.getContext('2d');
+                video2.addEventListener('play', function () {
+                    draw(video2, context2, canvas2.width, canvas2.height);
+                });
+            } catch (error) {
+                console.error("Error al acceder a la cámara: ", error);
+            }
+        }
+
+        async function startCamera() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                
+                const cameraSelect1 = document.getElementById('cameraSelect1');
+                const cameraSelect2 = document.getElementById('cameraSelect2');
+
+                devices.forEach(device => {
+                    if (device.kind === 'videoinput') {
+                        const option1 = document.createElement('option');
+                        option1.value = device.deviceId;
+                        option1.text = device.label || `Cámara ${cameraSelect1.options.length + 1}`;
+                        cameraSelect1.appendChild(option1);
+
+                        const option2 = document.createElement('option');
+                        option2.value = device.deviceId;
+                        option2.text = device.label || `Cámara ${cameraSelect2.options.length + 1}`;
+                        cameraSelect2.appendChild(option2);
+                    }
+                });
+            } catch (error) {
+                console.error('Error al enumerar los dispositivos:', error);
+            }
+        }
+
+        startCamera();
+
+        function draw(video, context, width, height) {
+            context.clearRect(0, 0, width, height);
+            context.drawImage(video, 0, 0, width, height);
+            requestAnimationFrame(function () {
+                draw(video, context, width, height);
+            });
+        }
+
+        document.getElementById('startButton').addEventListener('click', startStream);
+    </script>
+</body>
+</html>
