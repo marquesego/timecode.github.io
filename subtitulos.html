@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Subtítulos SRT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+        button {
+            margin-top: 10px;
+        }
+        #subtitle-list {
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generador de Subtítulos SRT</h1>
+    <textarea id="subtitle-text" placeholder="Escribe el texto del subtítulo aquí..."></textarea>
+    <br>
+    <button onclick="markEntry()">Entrada</button>
+    <button onclick="markExit()">Salida</button>
+    <button onclick="downloadSRT()">Descargar SRT</button>
+
+    <div id="subtitle-list">
+        <h2>Subtítulos generados:</h2>
+        <pre id="srt-output"></pre>
+    </div>
+
+    <script>
+        let subtitles = [];
+        let entryTime = null;
+        let subtitleIndex = 1;
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+            return `${hours}:${minutes}:${seconds},${milliseconds}`;
+        }
+
+        function markEntry() {
+            entryTime = new Date();
+            console.log(`Entrada: ${formatTime(entryTime)}`);
+        }
+
+        function markExit() {
+            if (!entryTime) {
+                alert('Primero marca la entrada.');
+                return;
+            }
+            const exitTime = new Date();
+            const text = document.getElementById('subtitle-text').value.trim();
+            if (text === "") {
+                alert('El cuadro de texto está vacío.');
+                return;
+            }
+            subtitles.push({
+                index: subtitleIndex++,
+                start: formatTime(entryTime),
+                end: formatTime(exitTime),
+                text: text
+            });
+            entryTime = null;
+            document.getElementById('subtitle-text').value = ""; // Clear text area
+            renderSubtitles();
+        }
+
+        function renderSubtitles() {
+            const output = document.getElementById('srt-output');
+            output.textContent = subtitles.map(subtitle => {
+                return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
+            }).join('\n');
+        }
+
+        function downloadSRT() {
+            const srtContent = subtitles.map(subtitle => {
+                return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
+            }).join('\n');
+            const blob = new Blob([srtContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'subtitulos.srt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
