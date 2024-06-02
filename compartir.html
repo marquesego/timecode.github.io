@@ -34,7 +34,9 @@
     <button onclick="markEntry()">Entrada</button>
     <button onclick="markExit()">Salida</button>
     <button onclick="downloadSRT()">Descargar SRT</button>
-    <button onclick="shareSRT()">Compartir SRT</button>
+    <button onclick="generateShareLink()">Generar enlace para compartir</button>
+    <br>
+    <input type="text" id="share-link" readonly style="width: 100%; margin-top: 10px;" placeholder="El enlace para compartir aparecerá aquí">
 
     <div id="subtitle-list">
         <h2>Subtítulos generados:</h2>
@@ -101,24 +103,14 @@
             URL.revokeObjectURL(url);
         }
 
-        function shareSRT() {
+        function generateShareLink() {
             const srtContent = subtitles.map(subtitle => {
                 return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
             }).join('\n');
             const blob = new Blob([srtContent], { type: 'text/plain' });
-            const file = new File([blob], 'subtitulos.srt', { type: 'text/plain' });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({
-                    files: [file],
-                    title: 'Subtítulos SRT',
-                    text: 'Aquí están los subtítulos en formato SRT.',
-                })
-                .then(() => console.log('Archivo compartido con éxito'))
-                .catch((error) => console.error('Error al compartir el archivo:', error));
-            } else {
-                alert('Tu navegador no soporta la API de compartir archivos.');
-            }
+            const url = URL.createObjectURL(blob);
+            const shareLink = document.getElementById('share-link');
+            shareLink.value = url;
         }
     </script>
 </body>
