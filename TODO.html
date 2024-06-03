@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUE LO COMPONGAN TRES PÁGINAS</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #main-container {
+            display: flex;
+            height: 100%;
+        }
+        #left-panel {
+            flex: 80;
+            height: 100%;
+        }
+        #right-panel {
+            flex: 20;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div id="left-panel">
+            <iframe src="realizacion.html"></iframe>
+        </div>
+        <div id="right-panel">
+            <button onclick="openPopup('ltc.html')">Generar LTC</button>
+            <iframe src="marcas.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function openPopup(url) {
+            window.open(url, "_blank", "width=400,height=400");
+        }
+    </script>
+</body>
+</html>
