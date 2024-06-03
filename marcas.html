@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Anotaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+        button {
+            margin-top: 10px;
+        }
+        #subtitle-list {
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+        #reset-button {
+            color: white;
+            background-color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generador de Anotaciones</h1>
+    <textarea id="subtitle-text" placeholder="Escribe el texto del subtítulo aquí..."></textarea>
+    <br>
+    <button id="annotation-button" onclick="markEntry()">Anotación</button>
+    <button id="download-button" onclick="downloadSRT()">Descargar Notas</button>
+
+    <div id="subtitle-list">
+        <h2>Notas Generadas:</h2>
+        <pre id="srt-output"></pre>
+    </div>
+    <button id="reset-button" onclick="resetData()">Reset (¡Borrar datos!)</button>
+
+    <script>
+        let subtitles = [];
+        let subtitleIndex = 1;
+        const defaultDuration = 10; // Duración predeterminada en segundos
+        const defaultFileName = "ANOTACION"; // Nombre de archivo predeterminado
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+            return `${hours}:${minutes}:${seconds},${milliseconds}`;
+        }
+
+        function markEntry() {
+            const currentTime = new Date();
+            const text = document.getElementById('subtitle-text').value.trim();
+
+            if (!text) {
+                alert('El cuadro de texto está vacío. Por favor, introduce un texto para la anotación.');
+                return;
+            }
+
+            const exitTime = new Date(currentTime.getTime() + defaultDuration * 1000); // Calcular el tiempo de salida
+            subtitles.push({
+                index: subtitleIndex++,
+                start: formatTime(currentTime),
+                end: formatTime(exitTime),
+                text: text
+            });
+
+            document.getElementById('subtitle-text').value = ""; // Clear text area
+            renderSubtitles();
+        }
+
+        function renderSubtitles() {
+            const output = document.getElementById('srt-output');
+            output.textContent = subtitles.map(subtitle => {
+                return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
+            }).join('\n');
+
+            saveSubtitlesToLocalStorage();
+        }
+
+        function downloadSRT() {
+            const srtContent = subtitles.map(subtitle => {
+                return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
+            }).join('\n');
+
+            const blob = new Blob([srtContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${defaultFileName}.srt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetData() {
+            if (confirm('¿Estás seguro de que deseas borrar todos los datos? Esta acción no se puede deshacer.')) {
+                if (isLocalStorageSupported()) {
+                    localStorage.removeItem('subtitles');
+                }
+                subtitles = [];
+                subtitleIndex = 1;
+                document.getElementById('srt-output').textContent = ''; // Clear the subtitle list
+                console.log('Datos reseteados.');
+            }
+        }
+
+        function saveSubtitlesToLocalStorage() {
+            if (isLocalStorageSupported()) {
+                localStorage.setItem('subtitles', JSON.stringify(subtitles));
+            }
+        }
+
+        function loadSubtitlesFromLocalStorage() {
+            if (isLocalStorageSupported()) {
+                const storedSubtitles = localStorage.getItem('subtitles');
+                if (storedSubtitles) {
+                    subtitles = JSON.parse(storedSubtitles);
+                    subtitleIndex = subtitles.length + 1;
+                    renderSubtitles();
+                }
+            }
+        }
+
+        function isLocalStorageSupported() {
+            try {
+                const key = '__test_local_storage__';
+                localStorage.setItem(key, key);
+                localStorage.removeItem(key);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Load saved subtitles when the page is loaded
+        window.onload = function() {
+            loadSubtitlesFromLocalStorage();
+        };
+    </script>
+</body>
+</html>

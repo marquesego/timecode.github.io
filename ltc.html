@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTC Audio Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #currentTime, #playbackTime {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>LTC Audio Player</h1>
+    <p id="currentTime">Current Time: --:--:--</p>
+    <p id="playbackTime">Playback Time: --:--:--</p>
+    <button id="playButton">Play LTC Sound</button>
+    <button id="stopButton">Stop LTC Sound</button>
+    <audio id="ltcAudio" src="ltc_24hours.mp3" preload="auto"></audio>
+
+    <script>
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = pad(now.getHours());
+            const minutes = pad(now.getMinutes());
+            const seconds = pad(now.getSeconds());
+            const currentTime = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('currentTime').innerText = `Current Time: ${currentTime}`;
+        }
+
+        function updatePlaybackTime() {
+            const audio = document.getElementById('ltcAudio');
+            const playbackTime = audio.currentTime;
+            const hours = pad(Math.floor(playbackTime / 3600));
+            const minutes = pad(Math.floor((playbackTime % 3600) / 60));
+            const seconds = pad(Math.floor(playbackTime % 60));
+            document.getElementById('playbackTime').innerText = `Playback Time: ${hours}:${minutes}:${seconds}`;
+        }
+
+        function playLTC() {
+            const now = new Date();
+            const startTimeInSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const audio = document.getElementById('ltcAudio');
+            audio.currentTime = startTimeInSeconds % audio.duration; // Ensure it doesn't exceed audio duration
+            audio.play();
+            setInterval(updatePlaybackTime, 1000);
+        }
+
+        function stopLTC() {
+            const audio = document.getElementById('ltcAudio');
+            audio.pause();
+            audio.currentTime = 0; // Reset to start
+            document.getElementById('playbackTime').innerText = 'Playback Time: --:--:--';
+        }
+
+        document.getElementById('playButton').addEventListener('click', playLTC);
+        document.getElementById('stopButton').addEventListener('click', stopLTC);
+        setInterval(updateCurrentTime, 1000);
+    </script>
+</body>
+</html>
