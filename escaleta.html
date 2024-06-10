@@ -52,6 +52,7 @@
 </head>
 <body>
     <h1>DEVUÉLVEME LOS TÁPERS</h1>
+    <button id="reset-button" onclick="resetData()">Reset (¡Borrar datos!)</button>
     <div id="fields-container"></div>
     <button id="download-button" onclick="downloadSRT()">Descargar Notas</button>
 
@@ -59,7 +60,6 @@
         <h2>Notas Generadas:</h2>
         <pre id="srt-output"></pre>
     </div>
-    <button id="reset-button" onclick="resetData()">Reset (¡Borrar datos!)</button>
 
     <script>
         let subtitles = [];
@@ -80,7 +80,11 @@
             "RECURSOS DEL DÍA A DÍA",
             "ENTRADA REPORTERO PUERTA",
             "ENTRADA RECEPTORES PUERTA",
-            "ENTREGA DE TÁPERS"
+            "ENTREGA DE TÁPERS",
+            "", // Campo en blanco 1
+            "", // Campo en blanco 2
+            "", // Campo en blanco 3
+            ""  // Campo en blanco 4
         ];
 
         function createField(index) {
@@ -91,6 +95,7 @@
             input.type = 'text';
             input.id = `subtitle-text-${index}`;
             input.value = predefinedTexts[index];
+            input.placeholder = predefinedTexts[index] ? "" : "Introduce una anotación..."; // Mostrar placeholder si está vacío
             container.appendChild(input);
 
             const button = document.createElement('button');
