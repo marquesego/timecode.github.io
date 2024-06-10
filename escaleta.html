@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESCALETA DEVUÉLVEME LOS TÁPERS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 110px);
+            margin-bottom: 10px;
+        }
+        input[type="text"]:disabled {
+            background-color: #ffcccc; /* Fondo rojo claro cuando está desactivado */
+            color: black;
+        }
+        button {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        button.annotated {
+            background-color: red; /* Botón en rojo después de anotar */
+            color: white;
+        }
+        #subtitle-list {
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+        #reset-button {
+            color: white;
+            background-color: red;
+            margin-top: 10px;
+        }
+        .field-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .field-container input[type="text"] {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>DEVUÉLVEME LOS TÁPERS</h1>
+    <div id="fields-container"></div>
+    <button id="download-button" onclick="downloadSRT()">Descargar Notas</button>
+
+    <div id="subtitle-list">
+        <h2>Notas Generadas:</h2>
+        <pre id="srt-output"></pre>
+    </div>
+    <button id="reset-button" onclick="resetData()">Reset (¡Borrar datos!)</button>
+
+    <script>
+        let subtitles = [];
+        let subtitleIndex = 1;
+        const defaultDuration = 10; // Duración predeterminada en segundos
+        const defaultFileName = "ANOTACION"; // Nombre de archivo predeterminado
+        const predefinedTexts = [
+            "RECETA 1",
+            "RECETA 2",
+            "ENTREVISTA COCINERO",
+            "ENTREVISTA RECEPTOR 1",
+            "ENTREVISTA RECEPTOR 2",
+            "ENTREVISTA RECEPTOR 3",
+            "RECURSOS TÁPER PARED",
+            "TUPPERS STOP MOTION",
+            "RECURSOS NEVERA, CAJONES…",
+            "FACHADA CASA",
+            "RECURSOS DEL DÍA A DÍA",
+            "ENTRADA REPORTERO PUERTA",
+            "ENTRADA RECEPTORES PUERTA",
+            "ENTREGA DE TÁPERS"
+        ];
+
+        function createField(index) {
+            const container = document.createElement('div');
+            container.classList.add('field-container');
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `subtitle-text-${index}`;
+            input.value = predefinedTexts[index];
+            container.appendChild(input);
+
+            const button = document.createElement('button');
+            button.innerText = 'Anotación';
+            button.onclick = function() { markEntry(index, button, input); };
+            container.appendChild(button);
+
+            return container;
+        }
+
+        function initializeFields() {
+            const fieldsContainer = document.getElementById('fields-container');
+            for (let i = 0; i < predefinedTexts.length; i++) {
+                fieldsContainer.appendChild(createField(i));
+            }
+        }
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+            return `${hours}:${minutes}:${seconds},${milliseconds}`;
+        }
+
+        function markEntry(index, button, input) {
+            const currentTime = new Date();
+            const text = input.value.trim();
+
+            if (!text) {
+                alert('El cuadro de texto está vacío. Por favor, introduce un texto para la anotación.');
+                return;
+            }
+
+            const exitTime = new Date(currentTime.getTime() + defaultDuration * 1000); // Calcular el tiempo de salida
+            subtitles.push({
+                index: subtitleIndex++,
+                start: formatTime(currentTime),
+                end: formatTime(exitTime),
+                text: text
+            });
+
+            input.disabled = true; // Desactivar el campo de texto
+            button.disabled = true; // Desactivar el botón
+            button.classList.add('annotated'); // Cambiar el estilo del botón
+
+            renderSubtitles();
+        }
+
+        function renderSubtitles() {
+            const output = document.getElementById('srt-output');
+            output.textContent = subtitles.map(subtitle => {
+                return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
+            }).join('\n');
+
+            saveSubtitlesToLocalStorage();
+        }
+
+        function downloadSRT() {
+            const srtContent = subtitles.map(subtitle => {
+                return `${subtitle.index}\n${subtitle.start} --> ${subtitle.end}\n${subtitle.text}\n`;
+            }).join('\n');
+
+            const blob = new Blob([srtContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${defaultFileName}.srt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetData() {
+            if (confirm('¿Estás seguro de que deseas borrar todos los datos? Esta acción no se puede deshacer.')) {
+                if (isLocalStorageSupported()) {
+                    localStorage.removeItem('subtitles');
+                }
+                subtitles = [];
+                subtitleIndex = 1;
+                document.getElementById('srt-output').textContent = ''; // Clear the subtitle list
+                document.getElementById('fields-container').innerHTML = ''; // Clear the fields
+                initializeFields(); // Re-initialize fields
+            }
+        }
+
+        function saveSubtitlesToLocalStorage() {
+            if (isLocalStorageSupported()) {
+                localStorage.setItem('subtitles', JSON.stringify(subtitles));
+            }
+        }
+
+        function loadSubtitlesFromLocalStorage() {
+            if (isLocalStorageSupported()) {
+                const storedSubtitles = localStorage.getItem('subtitles');
+                if (storedSubtitles) {
+                    subtitles = JSON.parse(storedSubtitles);
+                    subtitleIndex = subtitles.length + 1;
+                    renderSubtitles();
+                }
+            }
+        }
+
+        function isLocalStorageSupported() {
+            try {
+                const key = '__test_local_storage__';
+                localStorage.setItem(key, key);
+                localStorage.removeItem(key);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Load saved subtitles when the page is loaded
+        window.onload = function() {
+            loadSubtitlesFromLocalStorage();
+            initializeFields();
+        };
+    </script>
+</body>
+</html>
