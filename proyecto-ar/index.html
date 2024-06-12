@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ejemplo de Realidad Aumentada sin Servidor Local</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js/aframe/build/aframe-ar.js"></script>
+    <style>
+        body { margin: 0; font-family: sans-serif; text-align: center; }
+        #container { width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="loading">Cargando AR...</div>
+        <a-scene embedded arjs>
+            <a-marker type="pattern" url="assets/hiro.patt">
+                <a-box position="0 0.5 0" material="color: yellow;"></a-box>
+            </a-marker>
+            <a-entity camera></a-entity>
+        </a-scene>
+    </div>
+
+    <script>
+        document.querySelector('a-scene').addEventListener('loaded', function () {
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
