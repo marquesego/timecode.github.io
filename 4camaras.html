@@ -10,10 +10,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
         }
         .button-container {
             display: flex;
             margin-top: 20px;
+            z-index: 10;
         }
         button {
             margin: 10px;
@@ -26,32 +30,37 @@
         }
         #log-container {
             margin-top: 20px;
-            width: 640px; /* Ajuste el ancho según necesidad */
-            max-height: 300px; /* Altura máxima */
-            overflow-y: auto; /* Agregamos scroll vertical */
+            width: 640px;
+            max-height: 300px;
+            overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
-            white-space: pre; /* Conservar espacios y saltos de línea */
-            font-family: monospace; /* Fuente monoespaciada para alinear correctamente */
+            white-space: pre;
+            font-family: monospace;
         }
         #timecode {
             font-size: 18px;
             margin-top: 20px;
-            width: 640px; /* Ajuste el ancho según necesidad */
+            width: 640px;
         }
         .video-container {
             position: relative;
-            display: inline-block;
-            margin: 20px auto;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            max-width: 640px;
+            max-height: 480px;
         }
         video {
-            width: 640px;
-            height: 480px; /* Ajustado para una relación de aspecto de 16:9 */
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ajusta el video para llenar el contenedor */
         }
         .overlay {
             position: absolute;
-            border: 4px solid red; /* Grosor del borde */
+            border: 4px solid red;
             box-sizing: border-box;
+            pointer-events: none;
         }
         .top-left {
             top: 0;
@@ -91,9 +100,10 @@
         <button id="clip3Btn" onclick="selectClip('Clip3', 'clip3Btn', 'bottom-left')">Clip 3</button>
         <button id="clip4Btn" onclick="selectClip('Clip4', 'clip4Btn', 'bottom-right')">Clip 4</button>
         <button onclick="generateEDL()">Generate EDL</button>
+        <button onclick="toggleFullscreen()">Fullscreen</button>
     </div>
 
-    <div class="video-container">
+    <div class="video-container" id="videoContainer">
         <video id="video" autoplay></video>
         <div class="overlay top-left hidden"></div>
         <div class="overlay top-right hidden"></div>
@@ -109,28 +119,26 @@
     <script>
         let clips = [];
         let currentClip = null;
-        let sequenceTime = '00:00:00:00';
 
         const videoElement = document.getElementById('video');
+        const videoContainer = document.getElementById('videoContainer');
         const overlays = document.querySelectorAll('.overlay');
         const buttonIds = ['clip1Btn', 'clip2Btn', 'clip3Btn', 'clip4Btn'];
 
         async function startStream() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-
-            const constraints = {
-                video: true
-            };
-
             try {
+                const constraints = { video: true };
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                currentStream = stream;
                 videoElement.srcObject = stream;
                 videoElement.play();
             } catch (error) {
-                console.error("Error al acceder a la cámara: ", error);
+                if (error.name === 'NotAllowedError') {
+                    alert('Permission to access the camera was denied. Please enable it in your browser settings.');
+                } else if (error.name === 'NotFoundError') {
+                    alert('No camera device was found. Please ensure a camera is connected.');
+                } else {
+                    console.error('Error accessing the camera:', error);
+                }
             }
         }
 
@@ -153,7 +161,7 @@
             let hours = now.getHours().toString().padStart(2, '0');
             let minutes = now.getMinutes().toString().padStart(2, '0');
             let seconds = now.getSeconds().toString().padStart(2, '0');
-            let frames = Math.floor(now.getMilliseconds() / 40).toString().padStart(2, '0'); // Aproximadamente 25 fps
+            let frames = Math.floor(now.getMilliseconds() / 40).toString().padStart(2, '0');
             return `${hours}:${minutes}:${seconds}:${frames}`;
         }
 
@@ -234,19 +242,14 @@
                 sequenceStart = sequenceEnd;
             });
 
-            download('output.edl', edlText);
+            download('live_edl.edl', edlText);
         }
 
-        function calculateDuration(startTime, endTime) {
-            let start = timeStringToMilliseconds(startTime);
-            let end = timeStringToMilliseconds(endTime);
-            let duration = end - start;
-
-            if (duration <= 0) {
-                return '00:00:00:00';
-            }
-
-            return millisecondsToTimecode(duration);
+        function calculateDuration(start, end) {
+            let startMilliseconds = timeStringToMilliseconds(start);
+            let endMilliseconds = timeStringToMilliseconds(end);
+            let durationMilliseconds = endMilliseconds - startMilliseconds;
+            return millisecondsToTimecode(durationMilliseconds);
         }
 
         function timeStringToMilliseconds(timeString) {
@@ -306,31 +309,18 @@
             }
         });
 
-        setInterval(updateTimecode, 40);
-
-        // Función para iniciar el stream de la cámara
-        let currentStream;
-
-        async function startStream() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-
-            const constraints = {
-                video: true
-            };
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                currentStream = stream;
-                videoElement.srcObject = stream;
-                videoElement.play();
-            } catch (error) {
-                console.error("Error al acceder a la cámara: ", error);
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
             }
         }
 
-        // Llamada inicial para iniciar el stream de la cámara
+        setInterval(updateTimecode, 40);
+
         startStream();
     </script>
 </body>
