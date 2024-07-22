@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time EDL Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .button-container {
+            display: flex;
+            margin-top: 20px;
+            z-index: 10;
+            flex-wrap: wrap; /* Allows the buttons to wrap onto new lines */
+            justify-content: center; /* Centers the buttons */
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .active {
+            background-color: red;
+            color: white;
+        }
+        #log-container {
+            margin-top: 20px;
+            width: 640px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            white-space: pre;
+            font-family: monospace;
+        }
+        #timecode {
+            font-size: 18px;
+            margin-top: 20px;
+            width: 640px;
+        }
+        .video-container {
+            position: relative;
+            width: 50%; /* Escala la anchura al 50% */
+            height: auto; /* Ajusta la altura automáticamente */
+            max-width: 1920px;
+            max-height: 1080px;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .overlay {
+            position: absolute;
+            border: 4px solid red;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        .top-left {
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+        }
+        .top-right {
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+        }
+        .bottom-left {
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+        }
+        .bottom-right {
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time EDL Generator</h1>
+
+    <div class="button-container">
+        <button id="clip1Btn" onclick="selectClip('Clip1', 'clip1Btn', 'top-left')">Clip 1</button>
+        <button id="clip2Btn" onclick="selectClip('Clip2', 'clip2Btn', 'top-right')">Clip 2</button>
+        <button id="clip3Btn" onclick="selectClip('Clip3', 'clip3Btn', 'bottom-left')">Clip 3</button>
+        <button id="clip4Btn" onclick="selectClip('Clip4', 'clip4Btn', 'bottom-right')">Clip 4</button>
+        <button onclick="generateEDL()">Generate EDL</button>
+        <button onclick="toggleFullscreen()">Fullscreen</button>
+        <button onclick="resetLocalStorage()">Reset LocalStorage</button>
+        <button onclick="refreshVideoStream()">Refresh Video Stream</button>
+    </div>
+
+    <div class="video-container" id="videoContainer">
+        <video id="video" autoplay></video>
+        <div class="overlay top-left hidden"></div>
+        <div class="overlay top-right hidden"></div>
+        <div class="overlay bottom-left hidden"></div>
+        <div class="overlay bottom-right hidden"></div>
+    </div>
+
+    <div id="timecode"></div>
+    <div id="log-container">
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        let clips = [];
+        let currentClip = null;
+
+        const videoElement = document.getElementById('video');
+        const videoContainer = document.getElementById('videoContainer');
+        const overlays = document.querySelectorAll('.overlay');
+        const buttonIds = ['clip1Btn', 'clip2Btn', 'clip3Btn', 'clip4Btn'];
+
+        function saveToLocalStorage() {
+            localStorage.setItem('clips', JSON.stringify(clips));
+            localStorage.setItem('currentClip', JSON.stringify(currentClip));
+        }
+
+        function loadFromLocalStorage() {
+            const savedClips = localStorage.getItem('clips');
+            const savedCurrentClip = localStorage.getItem('currentClip');
+            if (savedClips) {
+                clips = JSON.parse(savedClips);
+                updateEDLDisplay();
+            }
+            if (savedCurrentClip) {
+                currentClip = JSON.parse(savedCurrentClip);
+                if (currentClip) {
+                    updateButtonStyles(`${currentClip.name.toLowerCase()}Btn`);
+                    toggleOverlay(getOverlayPositionFromClipName(currentClip.name));
+                }
+            }
+        }
+
+        function getOverlayPositionFromClipName(clipName) {
+            switch (clipName) {
+                case 'Clip1': return 'top-left';
+                case 'Clip2': return 'top-right';
+                case 'Clip3': return 'bottom-left';
+                case 'Clip4': return 'bottom-right';
+                default: return '';
+            }
+        }
+
+        async function startStream() {
+            try {
+                const constraints = {
+                    video: {
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                videoElement.play();
+                checkResolution(stream);
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    alert('Permission to access the camera was denied. Please enable it in your browser settings.');
+                } else if (error.name === 'NotFoundError') {
+                    alert('No camera device was found. Please ensure a camera is connected.');
+                } else {
+                    console.error('Error accessing the camera:', error);
+                }
+            }
+        }
+
+        function checkResolution(stream) {
+            const track = stream.getVideoTracks()[0];
+            const settings = track.getSettings();
+            console.log('Resolution:', settings.width, settings.height);
+            logEvent(`Resolution: ${settings.width}x${settings.height}`);
+        }
+
+        function toggleOverlay(position) {
+            overlays.forEach(overlay => {
+                if (overlay.classList.contains(position)) {
+                    overlay.classList.toggle('hidden');
+                } else {
+                    overlay.classList.add('hidden');
+                }
+            });
+        }
+
+        function updateTimecode() {
+            document.getElementById('timecode').textContent = `Current Timecode: ${getTimecode()}`;
+        }
+
+        function getTimecode() {
+            let now = new Date();
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
+            let frames = Math.floor(now.getMilliseconds() / 40).toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}:${frames}`;
+        }
+
+        function selectClip(clipName, buttonId, overlayPosition) {
+            let currentTimecode = getTimecode();
+
+            if (currentClip) {
+                currentClip.endTime = currentTimecode;
+                clips.push(currentClip);
+                logEvent(`Added ${currentClip.name} from ${currentClip.startTime} to ${currentClip.endTime}`);
+                currentClip = { name: clipName, startTime: currentTimecode, endTime: null };
+            } else {
+                currentClip = { name: clipName, startTime: currentTimecode, endTime: null };
+                logEvent(`Started ${clipName} at ${currentTimecode}`);
+            }
+
+            saveToLocalStorage();
+            updateButtonStyles(buttonId);
+            toggleOverlay(overlayPosition);
+        }
+
+        function updateButtonStyles(activeButtonId) {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (button.id === activeButtonId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        function logEvent(message) {
+            let logDiv = document.getElementById('log');
+            logDiv.textContent += message + '\n';
+            updateEDLDisplay();
+        }
+
+        function updateEDLDisplay() {
+            let edlText = "TITLE: LIVE_EDL\nFCM: NON-DROP FRAME\n\n";
+            let sequenceStart = '00:00:00:00';
+            let sequenceEnd = sequenceStart;
+
+            clips.forEach((clip, index) => {
+                let clipDuration = calculateDuration(clip.startTime, clip.endTime);
+
+                if (clipDuration === '00:00:00:00') {
+                    logEvent(`Warning: Skipping clip ${clip.name} due to zero duration.`);
+                    return;
+                }
+
+                sequenceEnd = addTimecode(sequenceStart, clipDuration);
+                edlText += `${(index + 1).toString().padStart(3, '0')}  ${clip.name}    V  C       ${clip.startTime} ${clip.endTime} ${sequenceStart} ${sequenceEnd}\n`;
+                sequenceStart = sequenceEnd;
+            });
+
+            document.getElementById('log').textContent = edlText;
+        }
+
+        function generateEDL() {
+            if (currentClip && !currentClip.endTime) {
+                logEvent(`Warning: The last clip ${currentClip.name} has no end time and will not be included in the EDL.`);
+            }
+
+            let edlText = "TITLE: LIVE_EDL\nFCM: NON-DROP FRAME\n\n";
+            let sequenceStart = '00:00:00:00';
+            let sequenceEnd = sequenceStart;
+
+            clips.forEach((clip, index) => {
+                let clipDuration = calculateDuration(clip.startTime, clip.endTime);
+
+                if (clipDuration === '00:00:00:00') {
+                    logEvent(`Warning: Skipping clip ${clip.name} due to zero duration.`);
+                    return;
+                }
+
+                sequenceEnd = addTimecode(sequenceStart, clipDuration);
+                edlText += `${(index + 1).toString().padStart(3, '0')}  ${clip.name}    V  C       ${clip.startTime} ${clip.endTime} ${sequenceStart} ${sequenceEnd}\n`;
+                sequenceStart = sequenceEnd;
+            });
+
+            download('live_edl.edl', edlText);
+        }
+
+        function calculateDuration(start, end) {
+            let startMilliseconds = timeStringToMilliseconds(start);
+            let endMilliseconds = timeStringToMilliseconds(end);
+            let durationMilliseconds = endMilliseconds - startMilliseconds;
+            return millisecondsToTimecode(durationMilliseconds);
+        }
+
+        function timeStringToMilliseconds(timeString) {
+            let [hours, minutes, seconds, frames] = timeString.split(':').map(Number);
+            let totalMilliseconds = (hours * 3600 + minutes * 60 + seconds) * 1000 + frames * 40; // Convert frames to milliseconds (25fps)
+            return totalMilliseconds;
+        }
+
+        function millisecondsToTimecode(milliseconds) {
+            let totalSeconds = milliseconds / 1000;
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = Math.floor((totalSeconds % 60));
+            let frames = Math.floor((milliseconds % 1000) / 40); // Convert milliseconds to frames (25fps)
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
+        }
+
+        function addTimecode(baseTimecode, durationTimecode) {
+            let baseMilliseconds = timeStringToMilliseconds(baseTimecode);
+            let durationMilliseconds = timeStringToMilliseconds(durationTimecode);
+            let totalMilliseconds = baseMilliseconds + durationMilliseconds;
+            return millisecondsToTimecode(totalMilliseconds);
+        }
+
+        function download(filename, text) {
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === '1') {
+                document.getElementById('clip1Btn').click();
+            } else if (event.key === '2') {
+                document.getElementById('clip2Btn').click();
+            } else if (event.key === '3') {
+                document.getElementById('clip3Btn').click();
+            } else if (event.key === '4') {
+                document.getElementById('clip4Btn').click();
+            }
+        });
+
+        videoElement.addEventListener('click', function(event) {
+            const { offsetX, offsetY } = event;
+
+            if (offsetX < videoElement.clientWidth / 2 && offsetY < videoElement.clientHeight / 2) {
+                document.getElementById('clip1Btn').click();
+            } else if (offsetX >= videoElement.clientWidth / 2 && offsetY < videoElement.clientHeight / 2) {
+                document.getElementById('clip2Btn').click();
+            } else if (offsetX < videoElement.clientWidth / 2 && offsetY >= videoElement.clientHeight / 2) {
+                document.getElementById('clip3Btn').click();
+            } else if (offsetX >= videoElement.clientWidth / 2 && offsetY >= videoElement.clientHeight / 2) {
+                document.getElementById('clip4Btn').click();
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function resetLocalStorage() {
+            localStorage.clear();
+            clips = [];
+            currentClip = null;
+            logEvent("LocalStorage reset and all clips cleared.");
+            updateEDLDisplay();
+        }
+
+        function refreshVideoStream() {
+            const stream = videoElement.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            startStream();
+            logEvent("Video stream refreshed and permissions requested again.");
+        }
+
+        setInterval(updateTimecode, 40);
+
+        startStream();
+        loadFromLocalStorage();
+    </script>
+</body>
+</html>
