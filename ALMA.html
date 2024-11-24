@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DULCES CON ALMA T4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #program-selector, button {
+            margin-bottom: 10px;
+        }
+        #program-container {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button.presentation {
+            background-color: #ffd1dc; /* Rosa pastel */
+            color: #000;
+        }
+        button.recipe {
+            background-color: #bae1ff; /* Azul pastel */
+            color: #000;
+        }
+        button.resources {
+            background-color: #c1e1c1; /* Verde pastel */
+            color: #000;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+        #reset-button {
+            color: white;
+            background-color: red;
+            margin-top: 10px;
+        }
+        #download-button {
+            color: white;
+            background-color: green;
+            margin-top: 10px;
+        }
+        #subtitle-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>DULCES CON ALMA T4</h1>
+    <label for="program-selector">Selecciona un programa:</label>
+    <select id="program-selector" onchange="updateProgram()">
+        <option value="" selected>Seleccionar...</option>
+    </select>
+    <div id="program-container"></div>
+    <button id="reset-button" onclick="resetData()">Reset (¡Borrar datos!)</button>
+    <button id="download-button" onclick="downloadSRT()">Descargar SRT</button>
+
+    <div id="subtitle-list">
+        <h2>Subtítulos generados:</h2>
+        <pre id="srt-output"></pre>
+    </div>
+
+    <script>
+        const programs = {
+            "PGM_01": ["Tarta de caramelo salado", "Vasitos de lemon pie", "Arroz con leche"],
+            "PGM_02": ["Panchineta", "Tartaletas de hojaldre", "Pasteles de belén"],
+            "PGM_03": ["Bambas de nata", "Tartaleta de ciruelas", "Mousse de turrón"],
+            "PGM_04": ["Profiteroles de galletas de caramelo", "Paris Brest", "Eclairs"],
+            "PGM_05": ["Bizcocho de café y nueces", "Tarta tres leches", "Bananas Foster"],
+            "PGM_06": ["Tarta moka", "Clafoutis", "Vasitos de brownie con crema de orujo"],
+            "PGM_07": ["Bundt cake de calabaza y chocolate", "Blondie", "Torrijas rellenas"],
+            "PGM_08": ["Bizcocho invertido de plátano", "Leche frita", "Vasitos de fresa y piña"],
+            "PGM_09": ["Budin de pan", "Tarta de cerezas", "Tarta de queso y chocolate blanco"],
+            "PGM_10": ["Rollos de pistacho y chocolate blanco", "Peras Bella Helena", "Huesos de santo"],
+            "PGM_11": ["Cupcakes Hi Hat", "Tarta de chocolate y naranja", "Tortitas de chocolate"],
+            "PGM_12": ["Macarons de tarta de queso", "Cannelés", "Cantuccini"],
+            "PGM_13": ["Tarta letra", "Bizcocho de batata", "Shortbread"],
+            "PGM_14": ["Bizcocho enrollado de limón", "Tarta de queso cremosa", "Natillas de cookies and cream"],
+            "PGM_15": ["Tartaleta de matcha y frutos rojos", "Flan de queso", "Magdalenas de la abuela"],
+            "PGM_16": ["Cupcakes de tiramisú", "Rosquillas tontas", "Buñuelos"],
+            "PGM_17": ["Croissants", "Trufas de galletas de caramelo", "Crema catalana"],
+            "PGM_18": ["Tarta de primer cumpleaños", "Brioche japonés", "Cookies gigantes de pistacho"],
+            "PGM_19": ["Donuts al horno de manzana", "Vasito de piña colada", "Bizcocho de chocolate"],
+            "PGM_20": ["Rollos de canela", "Muffins de zanahoria", "Tarta tatin"],
+            "PGM_21": ["Whoopie pies de chocolate", "Trenza de calabaza", "Vasitos de yogur y moras"],
+            "PGM_22": ["Tarta de limón y mascarpone", "Bizcocho de nata y fresas", "Cookie dough comestible"]
+        };
+
+        let subtitles = [];
+        let subtitleIndex = 1;
+        let lastEntryTime = null;
+        let recipeClickCounts = {};
+
+        function initializeProgramSelector() {
+            const selector = document.getElementById("program-selector");
+            Object.keys(programs).forEach(program => {
+                const option = document.createElement("option");
+                option.value = program;
+                option.textContent = program;
+                selector.appendChild(option);
+            });
+        }
+
+        function updateProgram() {
+            const programContainer = document.getElementById("program-container");
+            programContainer.innerHTML = ""; // Clear previous content
+            const selectedProgram = document.getElementById("program-selector").value;
+            if (!selectedProgram) return;
+
+            const recipes = programs[selectedProgram];
+            recipes.forEach((recipe, index) => {
+                const recipeNumber = index + 1;
+                recipeClickCounts[`${selectedProgram}_${recipeNumber}`] = 0;
+
+                const section = document.createElement("div");
+                section.innerHTML = `
+                    <h3>${recipe}</h3>
+                    <button class="presentation" onclick="addSubtitle('PRESENTACIÓN ${recipeNumber} - ${recipe}')">PRESENTACIÓN ${recipeNumber}</button>
+                    <button class="recipe" onclick="addRecipeSubtitle('${selectedProgram}', ${recipeNumber}, '${recipe}')">RECETA ${recipeNumber} - ${recipe}</button>
+                    <button class="resources" onclick="addSubtitle('RECURSOS ${recipeNumber} - ${recipe}')">RECURSOS ${recipeNumber}</button>
+                `;
+                programContainer.appendChild(section);
+            });
+        }
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const frames = Math.floor(date.getMilliseconds() / 40).toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds},${frames}`;
+        }
+
+        function addSubtitle(text) {
+            const currentTime = new Date();
+            if (lastEntryTime) {
+                subtitles[subtitles.length - 1].end = formatTime(currentTime);
+            }
+            subtitles.push({
+                index: subtitleIndex++,
+                start: formatTime(currentTime),
+                end: "...",
+                text: text
+            });
+            lastEntryTime = currentTime;
+            renderSubtitles();
+        }
+
+        function addRecipeSubtitle(program, recipeNumber, recipe) {
+            const key = `${program}_${recipeNumber}`;
+            recipeClickCounts[key]++;
+            let text = `RECETA ${recipeNumber} - ${recipe}`;
+            if (recipeClickCounts[key] > 1) {
+                text += ` (RETOME ${recipeClickCounts[key] - 1})`;
+            }
+            addSubtitle(text);
+        }
+
+        function renderSubtitles() {
+            const output = document.getElementById("srt-output");
+            output.textContent = subtitles.map(sub => {
+                return `${sub.index}\n${sub.start} --> ${sub.end}\n${sub.text}`;
+            }).join("\n\n");
+
+            // Scroll to the bottom
+            const subtitleContainer = document.getElementById("subtitle-list");
+            subtitleContainer.scrollTop = subtitleContainer.scrollHeight;
+        }
+
+        function downloadSRT() {
+            const srtContent = subtitles.map(sub => {
+                return `${sub.index}\n${sub.start} --> ${sub.end}\n${sub.text}`;
+            }).join("\n\n");
+
+            const blob = new Blob([srtContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "subtitles.srt";
+            a.click();
+        }
+
+        initializeProgramSelector();
+    </script>
+</body>
+</html>
