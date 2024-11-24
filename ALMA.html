@@ -126,9 +126,9 @@
                 const section = document.createElement("div");
                 section.innerHTML = `
                     <h3>${recipe}</h3>
-                    <button class="presentation" onclick="addSubtitle('PRESENTACIÓN ${recipeNumber} - ${recipe}')">PRESENTACIÓN ${recipeNumber}</button>
+                    <button class="presentation" onclick="addSubtitle('${selectedProgram} - PRESENTACIÓN ${recipeNumber} - ${recipe}')">PRESENTACIÓN ${recipeNumber}</button>
                     <button class="recipe" onclick="addRecipeSubtitle('${selectedProgram}', ${recipeNumber}, '${recipe}')">RECETA ${recipeNumber} - ${recipe}</button>
-                    <button class="resources" onclick="addSubtitle('RECURSOS ${recipeNumber} - ${recipe}')">RECURSOS ${recipeNumber}</button>
+                    <button class="resources" onclick="addSubtitle('${selectedProgram} - RECURSOS ${recipeNumber} - ${recipe}')">RECURSOS ${recipeNumber}</button>
                 `;
                 programContainer.appendChild(section);
             });
@@ -164,6 +164,7 @@
             if (recipeClickCounts[key] > 1) {
                 text += ` (RETOME ${recipeClickCounts[key] - 1})`;
             }
+            text = `${program} - ${text}`; // Add program number to recipe subtitle
             addSubtitle(text);
         }
 
@@ -189,9 +190,23 @@
             a.href = url;
             a.download = "subtitles.srt";
             a.click();
+            URL.revokeObjectURL(url);
         }
 
-        initializeProgramSelector();
+        function resetData() {
+            if (confirm("¿Estás seguro de que deseas borrar todos los datos?")) {
+                subtitles = [];
+                subtitleIndex = 1;
+                lastEntryTime = null;
+                recipeClickCounts = {};
+                renderSubtitles();
+            }
+        }
+
+        // Initialize
+        window.onload = function () {
+            initializeProgramSelector();
+        };
     </script>
 </body>
 </html>
