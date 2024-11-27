@@ -34,6 +34,14 @@
             background-color: #c1e1c1; /* Verde pastel */
             color: #000;
         }
+        button.publicity {
+            background-color: #fffacd; /* Amarillo pastel */
+            color: #000;
+        }
+        button.farewell {
+            background-color: #d1c4e9; /* Lila pastel */
+            color: #000;
+        }
         pre {
             background-color: #f4f4f4;
             padding: 10px;
@@ -97,10 +105,10 @@
             "PGM_22": ["Tarta de limón y mascarpone", "Bizcocho de nata y fresas", "Cookie dough comestible"]
         };
 
-        let subtitles = [];
-        let subtitleIndex = 1;
+        let subtitles = JSON.parse(localStorage.getItem("subtitles")) || [];
+        let subtitleIndex = subtitles.length ? subtitles[subtitles.length - 1].index + 1 : 1;
         let lastEntryTime = null;
-        let recipeClickCounts = {};
+        let recipeClickCounts = JSON.parse(localStorage.getItem("recipeClickCounts")) || {};
 
         function initializeProgramSelector() {
             const selector = document.getElementById("program-selector");
@@ -110,6 +118,7 @@
                 option.textContent = program;
                 selector.appendChild(option);
             });
+            renderSubtitles();
         }
 
         function updateProgram() {
@@ -121,7 +130,7 @@
             const recipes = programs[selectedProgram];
             recipes.forEach((recipe, index) => {
                 const recipeNumber = index + 1;
-                recipeClickCounts[`${selectedProgram}_${recipeNumber}`] = 0;
+                recipeClickCounts[`${selectedProgram}_${recipeNumber}`] = recipeClickCounts[`${selectedProgram}_${recipeNumber}`] || 0;
 
                 const section = document.createElement("div");
                 section.innerHTML = `
@@ -129,9 +138,17 @@
                     <button class="presentation" onclick="addSubtitle('${selectedProgram} - PRESENTACIÓN ${recipeNumber} - ${recipe}')">PRESENTACIÓN ${recipeNumber}</button>
                     <button class="recipe" onclick="addRecipeSubtitle('${selectedProgram}', ${recipeNumber}, '${recipe}')">RECETA ${recipeNumber} - ${recipe}</button>
                     <button class="resources" onclick="addSubtitle('${selectedProgram} - RECURSOS ${recipeNumber} - ${recipe}')">RECURSOS ${recipeNumber}</button>
+                    <button class="publicity" onclick="addPublicitySubtitle('${selectedProgram}', ${recipeNumber}, '${recipe}')">PUBLICIDAD ${recipeNumber}</button>
                 `;
                 programContainer.appendChild(section);
             });
+
+            // Add a farewell button for the entire program
+            const farewellButton = document.createElement("button");
+            farewellButton.className = "farewell";
+            farewellButton.textContent = "DESPEDIDA";
+            farewellButton.onclick = () => addSubtitle(`${selectedProgram} - DESPEDIDA`);
+            programContainer.appendChild(farewellButton);
         }
 
         function formatTime(date) {
@@ -154,6 +171,7 @@
                 text: text
             });
             lastEntryTime = currentTime;
+            saveData();
             renderSubtitles();
         }
 
@@ -164,8 +182,17 @@
             if (recipeClickCounts[key] > 1) {
                 text += ` (RETOME ${recipeClickCounts[key] - 1})`;
             }
-            text = `${program} - ${text}`; // Add program number to recipe subtitle
-            addSubtitle(text);
+            addSubtitle(`${program} - ${text}`);
+        }
+
+        function addPublicitySubtitle(program, recipeNumber, recipe) {
+            const key = `${program}_PUBLICITY_${recipeNumber}`;
+            recipeClickCounts[key] = (recipeClickCounts[key] || 0) + 1;
+            let text = `PUBLICIDAD ${recipeNumber} - ${recipe}`;
+            if (recipeClickCounts[key] > 1) {
+                text += ` (RETOME ${recipeClickCounts[key] - 1})`;
+            }
+            addSubtitle(`${program} - ${text}`);
         }
 
         function renderSubtitles() {
@@ -177,6 +204,11 @@
             // Scroll to the bottom
             const subtitleContainer = document.getElementById("subtitle-list");
             subtitleContainer.scrollTop = subtitleContainer.scrollHeight;
+        }
+
+        function saveData() {
+            localStorage.setItem("subtitles", JSON.stringify(subtitles));
+            localStorage.setItem("recipeClickCounts", JSON.stringify(recipeClickCounts));
         }
 
         function downloadSRT() {
@@ -199,6 +231,7 @@
                 subtitleIndex = 1;
                 lastEntryTime = null;
                 recipeClickCounts = {};
+                localStorage.clear();
                 renderSubtitles();
             }
         }
