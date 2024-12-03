@@ -85,7 +85,7 @@
             font-weight: 900;
             color: rgba(255, 204, 45, 0.9);
             cursor: pointer;
-            z-index: 10;
+            z-index: 5; /* Aseguramos que el número esté debajo de la descripción */
             line-height: 1;
             animation: zoom 2s infinite ease-in-out;
         }
@@ -147,12 +147,14 @@
         }
         .descripcion {
             position: absolute;
-            bottom: 5%;
-            left: 10%;
+            bottom: 10%; /* Ajustamos la posición para que esté encima del número */
+            left: 15%;
             color: #fff;
             font-size: 1rem; /* Tamaño más pequeño para las descripciones */
+
+
             line-height: 1.5;
-            z-index: 20;
+            z-index: 10; /* Aseguramos que la descripción esté encima del número */
             width: 80%; /* Ajuste el ancho de las descripciones */
         }
     </style>
