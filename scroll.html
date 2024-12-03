@@ -16,6 +16,8 @@
             background-color: #000;
             color: #fff;
             overflow: hidden;
+            position: relative;
+            height: 100vh;
         }
         .carrusel-container {
             position: relative;
@@ -85,7 +87,7 @@
             font-weight: 900;
             color: rgba(255, 204, 45, 0.9);
             cursor: pointer;
-            z-index: 5; /* Aseguramos que el número esté debajo de la descripción */
+            z-index: 5;
             line-height: 1;
             animation: zoom 2s infinite ease-in-out;
         }
@@ -110,20 +112,21 @@
             position: absolute;
             top: 10%;
             left: 10%;
-            width: 70%; /* Modificado a 70% */
-            height: 70%; /* Modificado a 70% */
-            background: rgba(0, 0, 0, 0.85); /* Menos opaco */
+            width: 70%;
+            height: 70%;
+            background: rgba(0, 0, 0, 0.85);
             color: #fff;
             padding: 20px;
             border-radius: 15px;
-            font-size: 1rem; /* Tipografía más pequeña */
+            font-size: 1rem;
             line-height: 1.4;
-            display: none; /* Oculto por defecto */
+            display: none;
             z-index: 30;
             overflow-y: auto;
+            cursor: pointer;
         }
         .ingredientes-recuadro.mostrar {
-            display: block; /* Visible cuando se activa */
+            display: block;
         }
         .boton {
             position: absolute;
@@ -147,22 +150,20 @@
         }
         .descripcion {
             position: absolute;
-            bottom: 10%; /* Ajustamos la posición para que esté encima del número */
-            left: 15%;
+            bottom: 10%;
+            left: 10%;
             color: #fff;
-            font-size: 1rem; /* Tamaño más pequeño para las descripciones */
-
-
+            font-size: 1rem;
             line-height: 1.5;
-            z-index: 10; /* Aseguramos que la descripción esté encima del número */
-            width: 80%; /* Ajuste el ancho de las descripciones */
+            z-index: 10;
+            width: 80%;
         }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
         <img src="ingredientes.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
-        <div class="ingredientes-recuadro" id="ingredientes-recuadro">
+        <div class="ingredientes-recuadro" id="ingredientes-recuadro" onclick="toggleIngredientes()">
             <h2>Ingredientes</h2>
             <p>Para la base:<br>
             155 g de harina<br>
@@ -190,7 +191,7 @@
                 <img src="cocinero1.jpg" alt="Cocinero">
             </div>
         </div>
-        <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
+        <button class="boton izquierda" id="botonIzquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <div class="carrusel" id="carrusel">
             <div class="video-wrapper">
                 <video loop muted autoplay>
@@ -223,23 +224,59 @@
                 </div>
             </div>
         </div>
-        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
+        <button class="boton derecha" id="botonDerecha" onclick="cambiarSlide(1)">&#8250;</button>
     </div>
 
     <script>
         const carrusel = document.getElementById('carrusel');
+        const totalSlides = carrusel.children.length;
         let index = 0;
 
         function cambiarSlide(direccion) {
-            const totalSlides = carrusel.children.length;
             index = (index + direccion + totalSlides) % totalSlides;
             carrusel.style.transform = `translateX(-${index * 100}%)`;
+            resetInactivityTimer();
         }
 
+        let inactivityTimer;
+        function startInactivityTimer() {
+            inactivityTimer = setTimeout(() => {
+                document.getElementById('botonIzquierda').style.opacity = 0;
+                document.getElementById('botonDerecha').style.opacity = 0;
+            }, 3000); // Ocultar botones después de 3 segundos de inactividad
+        }
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            document.getElementById('botonIzquierda').style.opacity = 1;
+            document.getElementById('botonDerecha').style.opacity = 1;
+            startInactivityTimer();
+        }
+
+        startInactivityTimer(); // Iniciar el temporizador de inactividad
+
+        // Función para activar/desactivar la visibilidad del recuadro de ingredientes
         function toggleIngredientes() {
             const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
             ingredientesRecuadro.classList.toggle('mostrar');
         }
+
+        // Evento para deslizamiento en dispositivos móviles
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        carrusel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        carrusel.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX > touchEndX + 50) {
+                cambiarSlide(1); // Deslizar a la derecha
+            } else if (touchStartX < touchEndX - 50) {
+                cambiarSlide(-1); // Deslizar a la izquierda
+            }
+        });
     </script>
 </body>
 </html>
