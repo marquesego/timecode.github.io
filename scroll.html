@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrusel Pantalla Completa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+        .carrusel-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .carrusel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            width: 100%;
+            height: 100%;
+        }
+        .video-wrapper {
+            flex: 0 0 100%;
+            position: relative;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .texto-animado {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            text-align: right;
+            font-size: 30vw;
+            font-weight: 900;
+            color: rgba(255, 204, 45, 0.8);
+            text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.8);
+            padding: 0 5vw;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .descripcion {
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            max-width: 80%;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(20px);
+            z-index: 20;
+        }
+        .descripcion.mostrar {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .boton {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .boton.izquierda {
+            left: 20px;
+        }
+        .boton.derecha {
+            right: 20px;
+        }
+        .indicadores {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .indicador {
+            width: 15px;
+            height: 15px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .indicador.activo {
+            background-color: rgba(255, 204, 45, 0.9);
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateX(10%);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="carrusel-container">
+        <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
+        <div class="carrusel" id="carrusel">
+            <div class="video-wrapper">
+                <video loop muted autoplay>
+                    <source src="video1.mp4" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+                <div class="texto-animado" onclick="toggleDescripcion(0)">1</div>
+                <div class="descripcion" id="descripcion-0">
+                    Descripción del video 1. Este texto puede incluir detalles adicionales o información relevante.
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <video loop muted autoplay>
+                    <source src="video2.mp4" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+                <div class="texto-animado" onclick="toggleDescripcion(1)">2</div>
+                <div class="descripcion" id="descripcion-1">
+                    Descripción del video 2. Aquí puedes añadir cualquier detalle que desees destacar.
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <video loop muted autoplay>
+                    <source src="video3.mp4" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+                <div class="texto-animado" onclick="toggleDescripcion(2)">3</div>
+                <div class="descripcion" id="descripcion-2">
+                    Descripción del video 3. Explicación breve o contexto del contenido mostrado.
+                </div>
+            </div>
+        </div>
+        <div class="indicadores" id="indicadores">
+            <div class="indicador activo" onclick="irASlide(0)"></div>
+            <div class="indicador" onclick="irASlide(1)"></div>
+            <div class="indicador" onclick="irASlide(2)"></div>
+        </div>
+        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
+    </div>
+
+    <script>
+        const carrusel = document.getElementById('carrusel');
+        const indicadores = document.getElementById('indicadores').children;
+        let index = 0;
+
+        function cambiarSlide(direccion) {
+            const totalSlides = carrusel.children.length;
+            index = (index + direccion + totalSlides) % totalSlides;
+            actualizarCarrusel();
+        }
+
+        function irASlide(nuevoIndex) {
+            index = nuevoIndex;
+            actualizarCarrusel();
+        }
+
+        function actualizarCarrusel() {
+            carrusel.style.transform = `translateX(-${index * 100}%)`;
+            // Reinicia la animación del texto
+            const textos = document.querySelectorAll('.texto-animado');
+            textos.forEach(texto => texto.style.animation = 'none');
+            setTimeout(() => {
+                textos[index].style.animation = 'fadeIn 2s ease-out forwards';
+            }, 50);
+            // Actualiza los indicadores
+            Array.from(indicadores).forEach((indicador, i) => {
+                indicador.classList.toggle('activo', i === index);
+            });
+        }
+
+        // Control táctil para dispositivos móviles
+        let startX = 0;
+        carrusel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+        carrusel.addEventListener('touchend', (e) => {
+            const deltaX = e.changedTouches[0].clientX - startX;
+            if (deltaX > 50) cambiarSlide(-1);
+            if (deltaX < -50) cambiarSlide(1);
+        });
+
+        // Mostrar y ocultar descripción
+        function toggleDescripcion(index) {
+            const descripcion = document.getElementById(`descripcion-${index}`);
+            descripcion.classList.toggle('mostrar');
+        }
+    </script>
+</body>
+</html>
