@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel Pantalla Completa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <title>Carrusel con Ingredientes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -41,28 +41,66 @@
             height: 100%;
             object-fit: cover;
         }
-        .texto-animado {
+        .texto-comun {
             position: absolute;
-            top: 0;
-            right: 100;
-            width: 100%;
-            height: 100%;
+            top: 10px;
+            right: 20px;
+            text-align: right;
+            color: #fff;
+            font-family: 'Passion One', cursive;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            text-align: left;
-            font-size: 30vw;
-            font-weight: 900;
-            color: rgba(255, 204, 45, 0.8);
-            text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.8);
-            padding: 0 5vw;
-            cursor: pointer;
+            gap: 10px;
             z-index: 10;
         }
-        .descripcion {
+        .texto-comun .titulo {
+            font-size: 3rem;
+            line-height: 1;
+            text-transform: capitalize;
+            color: rgba(255, 204, 45, 0.9);
+        }
+        .texto-comun .subtitulo {
+            font-size: 1.5rem;
+            line-height: 1.2;
+            font-weight: normal;
+            color: #fff;
+        }
+        .texto-comun .imagen-redonda {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 204, 45, 0.9);
+        }
+        .texto-comun .imagen-redonda img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .numero-animado {
             position: absolute;
             bottom: 10%;
             left: 10%;
+            font-size: 8rem; /* Aumenta el tamaño del número */
+            font-weight: 900;
+            color: rgba(255, 204, 45, 0.9);
+            cursor: pointer;
+            z-index: 10;
+            line-height: 1;
+            animation: zoom 2s infinite ease-in-out;
+        }
+        @keyframes zoom {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        .descripcion {
+            position: absolute;
+            bottom: 5%;
+            left: 8%;
             background: rgba(0, 0, 0, 0.7);
             color: #fff;
             padding: 20px;
@@ -75,11 +113,40 @@
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             transform: translateY(20px);
             z-index: 20;
+            cursor: pointer;
         }
         .descripcion.mostrar {
             display: block;
             opacity: 1;
             transform: translateY(0);
+        }
+        .ingredientes-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        .ingredientes-recuadro {
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            display: none;
+            z-index: 30;
+            overflow-y: auto;
+        }
+        .ingredientes-recuadro.mostrar {
+            display: block;
         }
         .boton {
             position: absolute;
@@ -101,39 +168,37 @@
         .boton.derecha {
             right: 20px;
         }
-        .indicadores {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-        .indicador {
-            width: 15px;
-            height: 15px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .indicador.activo {
-            background-color: rgba(255, 204, 45, 0.9);
-        }
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateX(10%);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
+        <img src="ingredientes.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
+        <div class="ingredientes-recuadro" id="ingredientes-recuadro">
+            Para la base:<br>
+            155 g de harina<br>
+            1 cucharada de azúcar<br>
+            1/2 cucharadita de sal<br>
+            110 g de mantequilla fría en cubos<br>
+            35 ml de agua<br><br>
+            Para el relleno:<br>
+            3 huevos<br>
+            250 ml de sirope de arce<br>
+            50 g de azúcar blanco<br>
+            50 g de azúcar moreno<br>
+            10 g de harina<br>
+            60 g de mantequilla derretida<br>
+            1 pizca de sal<br>
+            280 g de nueces pecanas peladas
+        </div>
+        <div class="texto-comun">
+            <div>
+                <div class="titulo">Pecan Pie</div>
+                <div class="subtitulo">Alma Obregón</div>
+            </div>
+            <div class="imagen-redonda">
+                <img src="cocinero1.jpg" alt="Cocinero">
+            </div>
+        </div>
         <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <div class="carrusel" id="carrusel">
             <div class="video-wrapper">
@@ -141,8 +206,8 @@
                     <source src="video1.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="texto-animado" onclick="toggleDescripcion(0)">1</div>
-                <div class="descripcion" id="descripcion-0">
+                <div class="numero-animado" onclick="toggleDescripcion(0)">1</div>
+                <div class="descripcion" id="descripcion-0" onclick="toggleDescripcion(0)">
                     Descripción del video 1. Este texto puede incluir detalles adicionales o información relevante.
                 </div>
             </div>
@@ -151,8 +216,8 @@
                     <source src="video2.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="texto-animado" onclick="toggleDescripcion(1)">2</div>
-                <div class="descripcion" id="descripcion-1">
+                <div class="numero-animado" onclick="toggleDescripcion(1)">2</div>
+                <div class="descripcion" id="descripcion-1" onclick="toggleDescripcion(1)">
                     Descripción del video 2. Aquí puedes añadir cualquier detalle que desees destacar.
                 </div>
             </div>
@@ -161,65 +226,33 @@
                     <source src="video3.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="texto-animado" onclick="toggleDescripcion(2)">3</div>
-                <div class="descripcion" id="descripcion-2">
+                <div class="numero-animado" onclick="toggleDescripcion(2)">3</div>
+                <div class="descripcion" id="descripcion-2" onclick="toggleDescripcion(2)">
                     Descripción del video 3. Explicación breve o contexto del contenido mostrado.
                 </div>
             </div>
-        </div>
-        <div class="indicadores" id="indicadores">
-            <div class="indicador activo" onclick="irASlide(0)"></div>
-            <div class="indicador" onclick="irASlide(1)"></div>
-            <div class="indicador" onclick="irASlide(2)"></div>
         </div>
         <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
     </div>
 
     <script>
         const carrusel = document.getElementById('carrusel');
-        const indicadores = document.getElementById('indicadores').children;
         let index = 0;
 
         function cambiarSlide(direccion) {
             const totalSlides = carrusel.children.length;
             index = (index + direccion + totalSlides) % totalSlides;
-            actualizarCarrusel();
-        }
-
-        function irASlide(nuevoIndex) {
-            index = nuevoIndex;
-            actualizarCarrusel();
-        }
-
-        function actualizarCarrusel() {
             carrusel.style.transform = `translateX(-${index * 100}%)`;
-            // Reinicia la animación del texto
-            const textos = document.querySelectorAll('.texto-animado');
-            textos.forEach(texto => texto.style.animation = 'none');
-            setTimeout(() => {
-                textos[index].style.animation = 'fadeIn 2s ease-out forwards';
-            }, 50);
-            // Actualiza los indicadores
-            Array.from(indicadores).forEach((indicador, i) => {
-                indicador.classList.toggle('activo', i === index);
-            });
         }
 
-        // Control táctil para dispositivos móviles
-        let startX = 0;
-        carrusel.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        });
-        carrusel.addEventListener('touchend', (e) => {
-            const deltaX = e.changedTouches[0].clientX - startX;
-            if (deltaX > 50) cambiarSlide(-1);
-            if (deltaX < -50) cambiarSlide(1);
-        });
-
-        // Mostrar y ocultar descripción
-        function toggleDescripcion(index) {
-            const descripcion = document.getElementById(`descripcion-${index}`);
+        function toggleDescripcion(id) {
+            const descripcion = document.getElementById(`descripcion-${id}`);
             descripcion.classList.toggle('mostrar');
+        }
+
+        function toggleIngredientes() {
+            const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
+            ingredientesRecuadro.classList.toggle('mostrar');
         }
     </script>
 </body>
