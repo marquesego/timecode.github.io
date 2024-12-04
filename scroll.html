@@ -81,13 +81,13 @@
         }
         .numero-animado {
             position: absolute;
-            bottom: 10%;
-            left: 10%;
+            bottom: 8%;
+            left: 5%;
             font-size: 8rem;
             font-weight: 900;
             color: rgba(255, 204, 45, 0.9);
             cursor: pointer;
-            z-index: 5;
+            z-index: 20;
             line-height: 1;
             animation: zoom 2s infinite ease-in-out;
         }
@@ -110,10 +110,10 @@
         }
         .ingredientes-recuadro {
             position: absolute;
-            top: 10%;
-            left: 10%;
+            top: 13%;
+            left: 15%;
             width: 70%;
-            height: 70%;
+            height: 60%;
             background: rgba(0, 0, 0, 0.85);
             color: #fff;
             padding: 20px;
@@ -148,15 +148,23 @@
         .boton.derecha {
             right: 20px;
         }
-        .descripcion {
+        .descripcion-container {
             position: absolute;
-            bottom: 10%;
-            left: 10%;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 15), transparent);
             color: #fff;
-            font-size: 1rem;
-            line-height: 1.5;
+            padding: 80px 140px;
+            box-sizing: border-box;
             z-index: 10;
-            width: 80%;
+        }
+        .descripcion {
+
+            font-size: 1.2rem;
+            line-height: 1.5;
+
+ 
         }
     </style>
 </head>
@@ -199,8 +207,10 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">1</div>
-                <div class="descripcion">
-                    Descripción del video 1. Este texto puede incluir detalles adicionales o información relevante.
+                <div class="descripcion-container">
+                    <div class="descripcion">
+                    Mezclamos la harina y el huevo
+                    </div>
                 </div>
             </div>
             <div class="video-wrapper">
@@ -209,8 +219,10 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">2</div>
-                <div class="descripcion">
-                    Descripción del video 2. Aquí puedes añadir cualquier detalle que desees destacar.
+                <div class="descripcion-container">
+                    <div class="descripcion">
+                        Descripción del video 2. Aquí puedes añadir cualquier detalle que desees destacar.
+                    </div>
                 </div>
             </div>
             <div class="video-wrapper">
@@ -219,8 +231,10 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">3</div>
-                <div class="descripcion">
-                    Descripción del video 3. Explicación breve o contexto del contenido mostrado.
+                <div class="descripcion-container">
+                    <div class="descripcion">
+                        Descripción del video 3. Explicación breve o contexto del contenido mostrado.
+                    </div>
                 </div>
             </div>
         </div>
