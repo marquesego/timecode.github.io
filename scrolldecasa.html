@@ -193,7 +193,7 @@
 </head>
 <body>
     <div class="carrusel-container">
-        <audio id="audio" src="musica.mp3" autoplay muted loop></audio>
+        <audio id="audio" src="musica.mp3" loop></audio>
         <img src="materiales.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
         <div class="ingredientes-recuadro" id="ingredientes-recuadro" onclick="toggleIngredientes()">
             <h2>Material</h2>
@@ -259,42 +259,31 @@
     <script>
         let index = 0;
         const carrusel = document.getElementById('carrusel');
-        const totalSlides = carrusel.children.length;
+        const slides = document.querySelectorAll('.video-wrapper');
+        const audio = document.getElementById('audio');
+        const botonMusica = document.getElementById('botonMusica');
 
         function cambiarSlide(direccion) {
-            index = (index + direccion + totalSlides) % totalSlides;
+            index += direccion;
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
             carrusel.style.transform = `translateX(-${index * 100}%)`;
-            resetInactivityTimer();
         }
 
         function toggleMusica() {
-            const audio = document.getElementById('audio');
-            const boton = document.getElementById('botonMusica');
-            
-            if (audio.muted) {
-                audio.muted = false;
-                boton.textContent = '🔈';
+            if (audio.paused) {
+                audio.play();
+                botonMusica.textContent = '🔈';
             } else {
-                audio.muted = true;
-                boton.textContent = '🔊';
+                audio.pause();
+                botonMusica.textContent = '🔊';
             }
-        }
-
-        let inactivityTimer;
-
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                toggleMusica();
-            }, 5000);
         }
 
         function toggleIngredientes() {
             const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
             ingredientesRecuadro.classList.toggle('mostrar');
         }
-
-        resetInactivityTimer();
     </script>
 </body>
 </html>
