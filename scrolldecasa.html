@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel Ajustado a Pantalla</title>
+    <title>Carrusel con Ingredientes</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -16,6 +16,8 @@
             background-color: #000;
             color: #fff;
             overflow: hidden;
+            height: 100dvh; /* Altura dinámica para móviles */
+            position: relative;
         }
         .carrusel-container {
             position: relative;
@@ -23,7 +25,7 @@
             align-items: center;
             justify-content: center;
             width: 100vw;
-            min-height: 100vh; /* Se asegura de usar el viewport completo */
+            height: 100dvh; /* Usa la altura dinámica para ajustarse mejor */
             overflow: hidden;
         }
         .carrusel {
@@ -35,16 +37,11 @@
         .video-wrapper {
             flex: 0 0 100%;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%; /* Asegura el ajuste del contenedor */
         }
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ajusta el video para cubrir el espacio completo */
+            object-fit: cover; /* Ajuste dinámico del vídeo */
         }
         .texto-comun {
             position: absolute;
@@ -102,6 +99,35 @@
                 transform: scale(1.1);
             }
         }
+        .ingredientes-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        .ingredientes-recuadro {
+            position: absolute;
+            top: 13%;
+            left: 15%;
+            width: 70%;
+            height: 60%;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1rem;
+            line-height: 1.4;
+            display: none;
+            z-index: 30;
+            overflow-y: auto;
+            cursor: pointer;
+        }
+        .ingredientes-recuadro.mostrar {
+            display: block;
+        }
         .boton {
             position: absolute;
             top: 50%;
@@ -122,29 +148,21 @@
         .boton.derecha {
             right: 20px;
         }
-        .descripcion-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
-            color: #fff;
-            padding: 80px 130px;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-        .descripcion {
-            position: absolute;
-            bottom: 15%;
-            width: 60%;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
+        <audio src="musica.mp3" autoplay loop playsinline></audio>
+        <img src="materiales.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
+        <div class="ingredientes-recuadro" id="ingredientes-recuadro" onclick="toggleIngredientes()">
+            <h2>Material</h2>
+            <p>
+                Pegamento de barra<br>
+                Bolsas papel kraft<br>
+                Cuerda rafia<br>
+                Tijeras
+            </p>
+        </div>
         <div class="texto-comun">
             <div>
                 <div class="titulo">Estrella Decorativa</div>
@@ -157,22 +175,22 @@
         <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <div class="carrusel" id="carrusel">
             <div class="video-wrapper">
-                <video muted autoplay playsinline loop>
+                <video loop muted autoplay playsinline>
                     <source src="decasa1.mp4" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
                 </video>
+                <div class="numero-animado">1</div>
             </div>
             <div class="video-wrapper">
-                <video muted autoplay playsinline loop>
+                <video loop muted autoplay playsinline>
                     <source src="decasa2.mp4" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
                 </video>
+                <div class="numero-animado">2</div>
             </div>
             <div class="video-wrapper">
-                <video muted autoplay playsinline loop>
+                <video loop muted autoplay playsinline>
                     <source src="decasa3.mp4" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
                 </video>
+                <div class="numero-animado">3</div>
             </div>
         </div>
         <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
@@ -186,6 +204,11 @@
         function cambiarSlide(direccion) {
             index = (index + direccion + totalSlides) % totalSlides;
             carrusel.style.transform = `translateX(-${index * 100}%)`;
+        }
+
+        function toggleIngredientes() {
+            const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
+            ingredientesRecuadro.classList.toggle('mostrar');
         }
     </script>
 </body>
