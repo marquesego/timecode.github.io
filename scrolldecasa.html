@@ -41,8 +41,7 @@
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            background-color: #000;
+            object-fit: contain;
         }
         .texto-comun {
             position: absolute;
@@ -56,6 +55,30 @@
             gap: 10px;
             z-index: 10;
         }
+        .texto-comun .titulo {
+            font-size: 3rem;
+            line-height: 1;
+            text-transform: capitalize;
+            color: rgba(255, 204, 45, 0.9);
+        }
+        .texto-comun .subtitulo {
+            font-size: 1.5rem;
+            line-height: 1.2;
+            font-weight: normal;
+            color: #fff;
+        }
+        .texto-comun .imagen-redonda {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 204, 45, 0.9);
+        }
+        .texto-comun .imagen-redonda img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         .numero-animado {
             position: absolute;
             bottom: 5%;
@@ -63,7 +86,47 @@
             font-size: 8rem;
             font-weight: 900;
             color: rgba(255, 204, 45, 0.9);
+            cursor: pointer;
             z-index: 20;
+            line-height: 1;
+            animation: zoom 2s infinite ease-in-out;
+        }
+        @keyframes zoom {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        .ingredientes-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        .ingredientes-recuadro {
+            position: absolute;
+            top: 13%;
+            left: 15%;
+            width: 70%;
+            height: 60%;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1rem;
+            line-height: 1.4;
+            display: none;
+            z-index: 30;
+            overflow-y: auto;
+            cursor: pointer;
+        }
+        .ingredientes-recuadro.mostrar {
+            display: block;
         }
         .boton {
             position: absolute;
@@ -85,69 +148,101 @@
         .boton.derecha {
             right: 20px;
         }
+        .descripcion-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+            color: #fff;
+            padding: 80px 130px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        .descripcion {
+            position: absolute;
+            bottom: 15%;
+            width: 60%;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
-        <audio id="background-audio" src="musica.mp3" preload="auto" loop></audio>
+        <img src="materiales.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
+        <div class="ingredientes-recuadro" id="ingredientes-recuadro" onclick="toggleIngredientes()">
+            <h2>Material</h2>
+            <br>
+            Pegamento de barra<br>
+            Bolsas papel kraft<br>
+            Cuerda rafia<br>
+            Tijeras
+        </div>
+        <div class="texto-comun">
+            <div>
+                <div class="titulo">Estrella Decorativa</div>
+                <div class="subtitulo">Sofía Parapluie</div>
+            </div>
+            <div class="imagen-redonda">
+                <img src="presentador1.jpeg" alt="Cocinero">
+            </div>
+        </div>
+        <button class="boton izquierda" id="botonIzquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <div class="carrusel" id="carrusel">
             <div class="video-wrapper">
-                <video preload="metadata" muted playsinline loop>
-                    <source src="decasa1.mp4" type="video/mp4">
+                <video muted playsinline preload="none" data-src="decasa1.mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">1</div>
+                <div class="descripcion-container">
+                    <div class="descripcion">
+                        Pegamos las bolsas en horizontal y vertical
+                    </div>
+                </div>
             </div>
             <div class="video-wrapper">
-                <video preload="metadata" muted playsinline loop>
-                    <source src="decasa2.mp4" type="video/mp4">
+                <video muted playsinline preload="none" data-src="decasa2.mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">2</div>
+                <div class="descripcion-container">
+                    <div class="descripcion">
+                        Cortamos en diagonal por los bordes
+                    </div>
+                </div>
             </div>
             <div class="video-wrapper">
-                <video preload="metadata" muted playsinline loop>
-                    <source src="decasa3.mp4" type="video/mp4">
+                <video muted playsinline preload="none" data-src="decasa3.mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">3</div>
+                <div class="descripcion-container">
+                    <div class="descripcion">
+                        Estiramos de los vértices y tenemos una preciosa estrella!!!
+                    </div>
+                </div>
             </div>
         </div>
-        <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
-        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
+        <button class="boton derecha" id="botonDerecha" onclick="cambiarSlide(1)">&#8250;</button>
     </div>
 
     <script>
         const carrusel = document.getElementById('carrusel');
-        const audio = document.getElementById('background-audio');
-        const slides = document.querySelectorAll('.video-wrapper');
+        const totalSlides = carrusel.children.length;
         let index = 0;
 
         function cambiarSlide(direccion) {
-            index = (index + direccion + slides.length) % slides.length;
+            index = (index + direccion + totalSlides) % totalSlides;
             carrusel.style.transform = `translateX(-${index * 100}%)`;
-            cargarVideoActual();
+            loadVideo(index);  // Cargar el video al cambiar de slide
         }
 
-        function cargarVideoActual() {
-            slides.forEach((slide, i) => {
-                const video = slide.querySelector('video');
-                if (i === index) {
-                    video.play().catch(err => console.error('Error al reproducir el video:', err));
-                } else {
-                    video.pause();
-                    video.currentTime = 0;
-                }
-            });
+        // Función para activar/desactivar la visibilidad del recuadro de ingredientes
+        function toggleIngredientes() {
+            const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
+            ingredientesRecuadro.classList.toggle('mostrar');
         }
 
-        // Activar música después de interacción
-        document.body.addEventListener('click', () => {
-            audio.play().catch(err => console.error('Error al reproducir el audio:', err));
-        });
-
-        // Inicializar carrusel
-        cargarVideoActual();
-    </script>
-</body>
-</html>
+        // Función
