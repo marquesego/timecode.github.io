@@ -153,7 +153,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
- height: 60%;
+            height: 60%;
             background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
             color: #fff;
             padding: 80px 130px;
@@ -161,31 +161,24 @@
             z-index: 10;
         }
         .descripcion {
-  position: absolute;
-bottom: 15%;
- width: 60%;
-
+            position: absolute;
+            bottom: 15%;
+            width: 60%;
             font-size: 1rem;
             line-height: 1.5;
-
- 
         }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
-        <audio src="musica.mp3" autoplay>
-        </audio>
         <img src="materiales.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
         <div class="ingredientes-recuadro" id="ingredientes-recuadro" onclick="toggleIngredientes()">
             <h2>Material</h2>
-           <br>
+            <br>
             Pegamento de barra<br>
-            Bolsas papel kraftr<br>
+            Bolsas papel kraft<br>
             Cuerda rafia<br>
             Tijeras
-        
-            </p>
         </div>
         <div class="texto-comun">
             <div>
@@ -199,19 +192,19 @@ bottom: 15%;
         <button class="boton izquierda" id="botonIzquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <div class="carrusel" id="carrusel">
             <div class="video-wrapper">
-                <video loop muted autoplay>
+                <video loop muted autoplay playsinline>
                     <source src="decasa1.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">1</div>
                 <div class="descripcion-container">
                     <div class="descripcion">
-                    Pegamos las bolsas en horizontal y vertical
+                        Pegamos las bolsas en horizontal y vertical
                     </div>
                 </div>
             </div>
             <div class="video-wrapper">
-                <video loop muted autoplay>
+                <video loop muted autoplay playsinline>
                     <source src="decasa2.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
@@ -223,14 +216,14 @@ bottom: 15%;
                 </div>
             </div>
             <div class="video-wrapper">
-                <video loop muted autoplay>
+                <video loop muted autoplay playsinline>
                     <source src="decasa3.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="numero-animado">3</div>
                 <div class="descripcion-container">
                     <div class="descripcion">
-                        Estiramos de los vertices, y tenemos una preciosa estrella!!!
+                        Estiramos de los vértices y tenemos una preciosa estrella!!!
                     </div>
                 </div>
             </div>
@@ -246,25 +239,7 @@ bottom: 15%;
         function cambiarSlide(direccion) {
             index = (index + direccion + totalSlides) % totalSlides;
             carrusel.style.transform = `translateX(-${index * 100}%)`;
-            resetInactivityTimer();
         }
-
-        let inactivityTimer;
-        function startInactivityTimer() {
-            inactivityTimer = setTimeout(() => {
-                document.getElementById('botonIzquierda').style.opacity = 0;
-                document.getElementById('botonDerecha').style.opacity = 0;
-            }, 3000); // Ocultar botones después de 3 segundos de inactividad
-        }
-
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            document.getElementById('botonIzquierda').style.opacity = 1;
-            document.getElementById('botonDerecha').style.opacity = 1;
-            startInactivityTimer();
-        }
-
-        startInactivityTimer(); // Iniciar el temporizador de inactividad
 
         // Función para activar/desactivar la visibilidad del recuadro de ingredientes
         function toggleIngredientes() {
@@ -272,21 +247,14 @@ bottom: 15%;
             ingredientesRecuadro.classList.toggle('mostrar');
         }
 
-        // Evento para deslizamiento en dispositivos móviles
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        carrusel.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-
-        carrusel.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            if (touchStartX > touchEndX + 50) {
-                cambiarSlide(1); // Deslizar a la derecha
-            } else if (touchStartX < touchEndX - 50) {
-                cambiarSlide(-1); // Deslizar a la izquierda
-            }
+        // Configurar videos para asegurarse de que se reproduzcan automáticamente
+        document.querySelectorAll('video').forEach(video => {
+            video.muted = true;
+            video.playsInline = true;
+            video.autoplay = true;
+            video.play().catch(err => {
+                console.error('Error al reproducir el video:', err);
+            });
         });
     </script>
 </body>
