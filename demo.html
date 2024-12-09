@@ -225,7 +225,6 @@
                     <source src="video1.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <button onclick="toggleVideo('video1')" aria-label="Play/Pause">Play/Pause</button>
                 <div class="numero-animado" onclick="toggleDescripcion(0)">1</div>
                 <div class="descripcion" id="descripcion-0" onclick="toggleDescripcion(0)">
                     Descripción del video 1. Este texto puede incluir detalles adicionales o información relevante.
@@ -236,21 +235,9 @@
                     <source src="video2.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <button onclick="toggleVideo('video2')" aria-label="Play/Pause">Play/Pause</button>
                 <div class="numero-animado" onclick="toggleDescripcion(1)">2</div>
                 <div class="descripcion" id="descripcion-1" onclick="toggleDescripcion(1)">
                     Descripción del video 2. Aquí puedes añadir cualquier detalle que desees destacar.
-                </div>
-            </div>
-            <div class="video-wrapper">
-                <video id="video3" loop muted autoplay>
-                    <source src="video3.mp4" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
-                </video>
-                <button onclick="toggleVideo('video3')" aria-label="Play/Pause">Play/Pause</button>
-                <div class="numero-animado" onclick="toggleDescripcion(2)">3</div>
-                <div class="descripcion" id="descripcion-2" onclick="toggleDescripcion(2)">
-                    Descripción del video 3. Explicación breve o contexto del contenido mostrado.
                 </div>
             </div>
         </div>
@@ -260,12 +247,24 @@
     <script>
         const carrusel = document.getElementById('carrusel');
         let index = 0;
+        let startX = 0;
 
         function cambiarSlide(direccion) {
             const totalSlides = carrusel.children.length;
             index = (index + direccion + totalSlides) % totalSlides;
             carrusel.style.transform = `translateX(-${index * 100}%)`;
         }
+
+        // Swipe functionality
+        carrusel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        carrusel.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            if (endX - startX > 50) cambiarSlide(-1); // Swipe right
+            else if (startX - endX > 50) cambiarSlide(1); // Swipe left
+        });
 
         function toggleDescripcion(id) {
             const descripcion = document.getElementById(`descripcion-${id}`);
@@ -276,16 +275,6 @@
             const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
             ingredientesRecuadro.classList.toggle('mostrar');
         }
-
-        function toggleVideo(videoId) {
-            const video = document.getElementById(videoId);
-            if (video.paused) {
-                video.play();
-            } else {
-                video.pause();
-            }
-        }
     </script>
 </body>
-  </html>
-  
+</html>
