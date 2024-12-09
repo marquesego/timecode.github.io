@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel iPhone Fix</title>
+    <title>Carrusel con Videos para iOS</title>
     <style>
         body {
             margin: 0;
@@ -18,6 +18,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            position: relative;
         }
         .carrusel {
             display: flex;
@@ -32,13 +33,35 @@
         video {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Ajustar para que el video no se recorte */
+            object-fit: cover;
             background-color: #000;
+            display: block;
+        }
+        .boton {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .boton.izquierda {
+            left: 20px;
+        }
+        .boton.derecha {
+            right: 20px;
         }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
+        <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <div class="carrusel">
             <div class="video-wrapper">
                 <video id="video1" loop muted autoplay playsinline>
@@ -53,13 +76,22 @@
                 </video>
             </div>
         </div>
+        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
     </div>
 
     <script>
-        // Deslizamiento táctil
+        // Carrusel táctil y de clic
         const carrusel = document.querySelector('.carrusel');
         let startX = 0, currentIndex = 0;
 
+        // Función para cambiar de slide
+        function cambiarSlide(direction) {
+            const totalSlides = carrusel.children.length;
+            currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
+            carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
+        }
+
+        // Soporte para gestos táctiles
         carrusel.addEventListener('touchstart', e => {
             startX = e.touches[0].clientX;
         });
@@ -70,15 +102,10 @@
             else if (startX - endX > 50) cambiarSlide(1); // Desliza a la derecha
         });
 
-        function cambiarSlide(direction) {
-            const totalSlides = carrusel.children.length;
-            currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
-            carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
-        }
-
         // Autoplay Fix para iOS
         document.querySelectorAll('video').forEach(video => {
             video.play().catch(() => {
+                // Mostrar botón de reproducción si el autoplay falla
                 const playButton = document.createElement('button');
                 playButton.textContent = 'Reproducir';
                 playButton.style.position = 'absolute';
