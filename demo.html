@@ -3,39 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel con Videos para iOS</title>
+    <title>Carrusel Rediseñado</title>
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
             font-family: Arial, sans-serif;
             background: #000;
+            color: #fff;
             overflow: hidden;
         }
         .carrusel-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            position: relative;
         }
         .carrusel {
             display: flex;
+            transition: transform 0.5s ease-in-out;
             width: 100%;
             height: 100%;
-            transition: transform 0.5s ease;
         }
-        .video-wrapper {
+        .slide {
             flex: 0 0 100%;
             position: relative;
+            width: 100%;
+            height: 100%;
         }
         video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background-color: #000;
-            display: block;
+        }
+        .contenido-superior {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+        }
+        .contenido-superior h1 {
+            font-size: 2rem;
+            color: #fff;
+        }
+        .contenido-superior p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
         }
         .boton {
             position: absolute;
@@ -45,84 +63,100 @@
             color: #fff;
             border: none;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 30px;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
             cursor: pointer;
             z-index: 10;
         }
         .boton.izquierda {
-            left: 20px;
+            left: 10px;
         }
         .boton.derecha {
-            right: 20px;
+            right: 10px;
+        }
+        @media (max-width: 768px) {
+            .contenido-superior h1 {
+                font-size: 1.5rem;
+            }
+            .contenido-superior p {
+                font-size: 0.9rem;
+            }
+            .boton {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
+        <!-- Controles -->
         <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
-        <div class="carrusel">
-            <div class="video-wrapper">
-                <video id="video1" loop muted autoplay playsinline>
+        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
+        
+        <!-- Carrusel -->
+        <div class="carrusel" id="carrusel">
+            <div class="slide">
+                <video muted autoplay loop playsinline>
                     <source src="video1.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
+                <div class="contenido-superior">
+                    <h1>Video 1</h1>
+                    <p>Descripción breve del video 1</p>
+                </div>
             </div>
-            <div class="video-wrapper">
-                <video id="video2" loop muted autoplay playsinline>
+            <div class="slide">
+                <video muted autoplay loop playsinline>
                     <source src="video2.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
+                <div class="contenido-superior">
+                    <h1>Video 2</h1>
+                    <p>Descripción breve del video 2</p>
+                </div>
+            </div>
+            <div class="slide">
+                <video muted autoplay loop playsinline>
+                    <source src="video3.mp4" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+                <div class="contenido-superior">
+                    <h1>Video 3</h1>
+                    <p>Descripción breve del video 3</p>
+                </div>
             </div>
         </div>
-        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
     </div>
 
     <script>
-        // Carrusel táctil y de clic
-        const carrusel = document.querySelector('.carrusel');
-        let startX = 0, currentIndex = 0;
+        const carrusel = document.getElementById('carrusel');
+        let currentIndex = 0;
 
-        // Función para cambiar de slide
-        function cambiarSlide(direction) {
-            const totalSlides = carrusel.children.length;
-            currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
+        // Cambiar slides
+        function cambiarSlide(direccion) {
+            const slides = carrusel.children.length;
+            currentIndex = (currentIndex + direccion + slides) % slides;
             carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
         }
 
-        // Soporte para gestos táctiles
-        carrusel.addEventListener('touchstart', e => {
+        // Deslizamiento táctil
+        let startX = 0;
+        carrusel.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
         });
-
-        carrusel.addEventListener('touchend', e => {
+        carrusel.addEventListener('touchend', (e) => {
             const endX = e.changedTouches[0].clientX;
-            if (endX - startX > 50) cambiarSlide(-1); // Desliza a la izquierda
-            else if (startX - endX > 50) cambiarSlide(1); // Desliza a la derecha
+            if (endX - startX > 50) cambiarSlide(-1); // Swipe a la derecha
+            else if (startX - endX > 50) cambiarSlide(1); // Swipe a la izquierda
         });
 
-        // Autoplay Fix para iOS
+        // Manejo del autoplay
         document.querySelectorAll('video').forEach(video => {
             video.play().catch(() => {
-                // Mostrar botón de reproducción si el autoplay falla
-                const playButton = document.createElement('button');
-                playButton.textContent = 'Reproducir';
-                playButton.style.position = 'absolute';
-                playButton.style.top = '50%';
-                playButton.style.left = '50%';
-                playButton.style.transform = 'translate(-50%, -50%)';
-                playButton.style.background = 'rgba(0, 0, 0, 0.7)';
-                playButton.style.color = '#fff';
-                playButton.style.border = 'none';
-                playButton.style.padding = '10px 20px';
-                playButton.style.borderRadius = '5px';
-                playButton.style.cursor = 'pointer';
-                playButton.addEventListener('click', () => {
-                    video.play();
-                    playButton.remove();
-                });
-                video.parentElement.appendChild(playButton);
+                console.log('Autoplay falló. El video necesita ser reproducido manualmente.');
             });
         });
     </script>
