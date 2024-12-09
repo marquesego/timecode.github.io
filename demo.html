@@ -3,34 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel con Ingredientes Mejorado</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
+    <title>Carrusel iPhone Fix</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #000;
-            color: #fff;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #000;
             overflow: hidden;
         }
         .carrusel-container {
-            position: relative;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
         }
         .carrusel {
             display: flex;
-            transition: transform 0.5s ease-in-out;
             width: 100%;
             height: 100%;
+            transition: transform 0.5s ease;
         }
         .video-wrapper {
             flex: 0 0 100%;
@@ -39,242 +32,72 @@
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-        .texto-comun {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            text-align: right;
-            color: #fff;
-            font-family: 'Passion One', cursive;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 10;
-        }
-        .texto-comun .titulo {
-            font-size: 3rem;
-            line-height: 1;
-            text-transform: capitalize;
-            color: rgba(255, 204, 45, 0.9);
-        }
-        .texto-comun .subtitulo {
-            font-size: 1.5rem;
-            line-height: 1.2;
-            font-weight: normal;
-            color: #fff;
-        }
-        .texto-comun .imagen-redonda {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid rgba(255, 204, 45, 0.9);
-        }
-        .texto-comun .imagen-redonda img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .numero-animado {
-            position: absolute;
-            bottom: 10%;
-            left: 10%;
-            font-size: 8rem;
-            font-weight: 900;
-            color: rgba(255, 204, 45, 0.9);
-            cursor: pointer;
-            z-index: 10;
-            line-height: 1;
-            animation: zoom 2s infinite ease-in-out;
-        }
-        @keyframes zoom {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-        .descripcion {
-            position: absolute;
-            bottom: 5%;
-            left: 8%;
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            line-height: 1.5;
-            max-width: 80%;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            transform: translateY(20px);
-            z-index: 20;
-            cursor: pointer;
-        }
-        .descripcion.mostrar {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .ingredientes-btn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            z-index: 20;
-        }
-        .ingredientes-recuadro {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 80%;
-            background: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            line-height: 1.5;
-            display: none;
-            z-index: 30;
-            overflow-y: auto;
-            transform: scale(0.9);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .ingredientes-recuadro.mostrar {
-            display: block;
-            transform: scale(1);
-            opacity: 1;
-        }
-        .boton {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 30px;
-            cursor: pointer;
-            z-index: 10;
-        }
-        .boton.izquierda {
-            left: 20px;
-        }
-        .boton.derecha {
-            right: 20px;
-        }
-        @media (max-width: 768px) {
-            .numero-animado {
-                font-size: 4rem;
-            }
-            .descripcion {
-                font-size: 1rem;
-            }
-            .titulo {
-                font-size: 2rem;
-            }
-            .subtitulo {
-                font-size: 1rem;
-            }
+            object-fit: contain; /* Ajustar para que el video no se recorte */
+            background-color: #000;
         }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
-        <img src="ingredientes.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()" aria-label="Mostrar ingredientes">
-        <div class="ingredientes-recuadro" id="ingredientes-recuadro">
-            Para la base:<br>
-            155 g de harina<br>
-            1 cucharada de azúcar<br>
-            1/2 cucharadita de sal<br>
-            110 g de mantequilla fría en cubos<br>
-            35 ml de agua<br><br>
-            Para el relleno:<br>
-            3 huevos<br>
-            250 ml de sirope de arce<br>
-            50 g de azúcar blanco<br>
-            50 g de azúcar moreno<br>
-            10 g de harina<br>
-            60 g de mantequilla derretida<br>
-            1 pizca de sal<br>
-            280 g de nueces pecanas peladas
-        </div>
-        <div class="texto-comun">
-            <div>
-                <div class="titulo">Pecan Pie</div>
-                <div class="subtitulo">Alma Obregón</div>
-            </div>
-            <div class="imagen-redonda">
-                <img src="cocinero1.jpg" alt="Cocinero">
-            </div>
-        </div>
-        <button class="boton izquierda" onclick="cambiarSlide(-1)" aria-label="Anterior">&#8249;</button>
-        <div class="carrusel" id="carrusel">
+        <div class="carrusel">
             <div class="video-wrapper">
-                <video id="video1" loop muted autoplay>
+                <video id="video1" loop muted autoplay playsinline>
                     <source src="video1.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="numero-animado" onclick="toggleDescripcion(0)">1</div>
-                <div class="descripcion" id="descripcion-0" onclick="toggleDescripcion(0)">
-                    Descripción del video 1. Este texto puede incluir detalles adicionales o información relevante.
-                </div>
             </div>
             <div class="video-wrapper">
-                <video id="video2" loop muted autoplay>
+                <video id="video2" loop muted autoplay playsinline>
                     <source src="video2.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="numero-animado" onclick="toggleDescripcion(1)">2</div>
-                <div class="descripcion" id="descripcion-1" onclick="toggleDescripcion(1)">
-                    Descripción del video 2. Aquí puedes añadir cualquier detalle que desees destacar.
-                </div>
             </div>
         </div>
-        <button class="boton derecha" onclick="cambiarSlide(1)" aria-label="Siguiente">&#8250;</button>
     </div>
 
     <script>
-        const carrusel = document.getElementById('carrusel');
-        let index = 0;
-        let startX = 0;
+        // Deslizamiento táctil
+        const carrusel = document.querySelector('.carrusel');
+        let startX = 0, currentIndex = 0;
 
-        function cambiarSlide(direccion) {
-            const totalSlides = carrusel.children.length;
-            index = (index + direccion + totalSlides) % totalSlides;
-            carrusel.style.transform = `translateX(-${index * 100}%)`;
-        }
-
-        // Swipe functionality
-        carrusel.addEventListener('touchstart', (e) => {
+        carrusel.addEventListener('touchstart', e => {
             startX = e.touches[0].clientX;
         });
 
-        carrusel.addEventListener('touchend', (e) => {
+        carrusel.addEventListener('touchend', e => {
             const endX = e.changedTouches[0].clientX;
-            if (endX - startX > 50) cambiarSlide(-1); // Swipe right
-            else if (startX - endX > 50) cambiarSlide(1); // Swipe left
+            if (endX - startX > 50) cambiarSlide(-1); // Desliza a la izquierda
+            else if (startX - endX > 50) cambiarSlide(1); // Desliza a la derecha
         });
 
-        function toggleDescripcion(id) {
-            const descripcion = document.getElementById(`descripcion-${id}`);
-            descripcion.classList.toggle('mostrar');
+        function cambiarSlide(direction) {
+            const totalSlides = carrusel.children.length;
+            currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
+            carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
         }
 
-        function toggleIngredientes() {
-            const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
-            ingredientesRecuadro.classList.toggle('mostrar');
-        }
+        // Autoplay Fix para iOS
+        document.querySelectorAll('video').forEach(video => {
+            video.play().catch(() => {
+                const playButton = document.createElement('button');
+                playButton.textContent = 'Reproducir';
+                playButton.style.position = 'absolute';
+                playButton.style.top = '50%';
+                playButton.style.left = '50%';
+                playButton.style.transform = 'translate(-50%, -50%)';
+                playButton.style.background = 'rgba(0, 0, 0, 0.7)';
+                playButton.style.color = '#fff';
+                playButton.style.border = 'none';
+                playButton.style.padding = '10px 20px';
+                playButton.style.borderRadius = '5px';
+                playButton.style.cursor = 'pointer';
+                playButton.addEventListener('click', () => {
+                    video.play();
+                    playButton.remove();
+                });
+                video.parentElement.appendChild(playButton);
+            });
+        });
     </script>
 </body>
 </html>
