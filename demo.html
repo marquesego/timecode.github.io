@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel Rediseñado</title>
+    <title>Carrusel Rediseñado y Elegante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,7 +12,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             background: #000;
             color: #fff;
             overflow: hidden;
@@ -42,18 +43,56 @@
         .contenido-superior {
             position: absolute;
             top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
+            left: 20px;
+            z-index: 10;
+            text-align: left;
+        }
+        .contenido-superior .titulo {
+            font-family: 'Passion One', cursive;
+            font-size: 3rem;
+            text-transform: capitalize;
+            color: rgba(255, 204, 45, 0.9);
+            margin-bottom: 5px;
+        }
+        .contenido-superior .subtitulo {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .numero-animado {
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(255, 204, 45, 0.9);
+            cursor: pointer;
+            z-index: 10;
+            line-height: 1;
+            animation: zoom 2s infinite ease-in-out;
+        }
+        @keyframes zoom {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        .icono-redondo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(255, 204, 45, 0.9);
             z-index: 10;
         }
-        .contenido-superior h1 {
-            font-size: 2rem;
-            color: #fff;
-        }
-        .contenido-superior p {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.8);
+        .icono-redondo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .boton {
             position: absolute;
@@ -76,11 +115,14 @@
             right: 10px;
         }
         @media (max-width: 768px) {
-            .contenido-superior h1 {
-                font-size: 1.5rem;
+            .contenido-superior .titulo {
+                font-size: 2rem;
             }
-            .contenido-superior p {
-                font-size: 0.9rem;
+            .contenido-superior .subtitulo {
+                font-size: 1rem;
+            }
+            .numero-animado {
+                font-size: 4rem;
             }
             .boton {
                 width: 40px;
@@ -92,7 +134,7 @@
 </head>
 <body>
     <div class="carrusel-container">
-        <!-- Controles -->
+        <!-- Botones -->
         <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
         
@@ -104,8 +146,12 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="contenido-superior">
-                    <h1>Video 1</h1>
-                    <p>Descripción breve del video 1</p>
+                    <div class="titulo">Pecan Pie</div>
+                    <div class="subtitulo">Alma Obregón</div>
+                </div>
+                <div class="numero-animado">1</div>
+                <div class="icono-redondo">
+                    <img src="chef1.jpg" alt="Chef">
                 </div>
             </div>
             <div class="slide">
@@ -114,8 +160,12 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="contenido-superior">
-                    <h1>Video 2</h1>
-                    <p>Descripción breve del video 2</p>
+                    <div class="titulo">Carrot Cake</div>
+                    <div class="subtitulo">Jamie Oliver</div>
+                </div>
+                <div class="numero-animado">2</div>
+                <div class="icono-redondo">
+                    <img src="chef2.jpg" alt="Chef">
                 </div>
             </div>
             <div class="slide">
@@ -124,8 +174,12 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="contenido-superior">
-                    <h1>Video 3</h1>
-                    <p>Descripción breve del video 3</p>
+                    <div class="titulo">Apple Pie</div>
+                    <div class="subtitulo">Mary Berry</div>
+                </div>
+                <div class="numero-animado">3</div>
+                <div class="icono-redondo">
+                    <img src="chef3.jpg" alt="Chef">
                 </div>
             </div>
         </div>
@@ -136,27 +190,27 @@
         let currentIndex = 0;
 
         // Cambiar slides
-        function cambiarSlide(direccion) {
+        function cambiarSlide(direction) {
             const slides = carrusel.children.length;
-            currentIndex = (currentIndex + direccion + slides) % slides;
+            currentIndex = (currentIndex + direction + slides) % slides;
             carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
         }
 
-        // Deslizamiento táctil
+        // Swipe para móviles
         let startX = 0;
         carrusel.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
         });
         carrusel.addEventListener('touchend', (e) => {
             const endX = e.changedTouches[0].clientX;
-            if (endX - startX > 50) cambiarSlide(-1); // Swipe a la derecha
-            else if (startX - endX > 50) cambiarSlide(1); // Swipe a la izquierda
+            if (endX - startX > 50) cambiarSlide(-1); // Swipe derecha
+            else if (startX - endX > 50) cambiarSlide(1); // Swipe izquierda
         });
 
-        // Manejo del autoplay
+        // Manejo de autoplay en iOS y Android
         document.querySelectorAll('video').forEach(video => {
             video.play().catch(() => {
-                console.log('Autoplay falló. El video necesita ser reproducido manualmente.');
+                console.log('Autoplay falló.');
             });
         });
     </script>
