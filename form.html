@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Carrusel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        form {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input, 
+        .form-group textarea, 
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .form-group textarea {
+            height: 100px;
+        }
+        .form-group input[type="file"] {
+            padding: 5px;
+        }
+        .form-group button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #4cae4c;
+        }
+        .videos-container {
+            margin-bottom: 15px;
+        }
+        .video-input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generador de Carrusel de Recetas</h1>
+    <form id="recipeForm">
+        <div class="form-group">
+            <label for="recipeName">Nombre de la receta:</label>
+            <input type="text" id="recipeName" placeholder="Ej: Pecan Pie" required>
+        </div>
+        <div class="form-group">
+            <label for="chefName">Nombre del cocinero:</label>
+            <input type="text" id="chefName" placeholder="Ej: Alma Obregón" required>
+        </div>
+        <div class="form-group">
+            <label for="ingredients">Ingredientes:</label>
+            <textarea id="ingredients" placeholder="Ej: 155 g de harina, 3 huevos, etc." required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="comments">Comentarios:</label>
+            <textarea id="comments" placeholder="Ej: Receta clásica y deliciosa" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Videos de los pasos (máximo 3):</label>
+            <div class="videos-container" id="videosContainer">
+                <div class="video-input">
+                    <input type="file" accept="video/mp4" required>
+                </div>
+            </div>
+            <button type="button" onclick="addVideoInput()">Añadir otro video</button>
+        </div>
+        <div class="form-group">
+            <button type="submit">Generar HTML</button>
+        </div>
+    </form>
+
+    <script>
+        const MAX_VIDEOS = 3;
+        const form = document.getElementById('recipeForm');
+        const videosContainer = document.getElementById('videosContainer');
+
+        // Añadir otro input para subir videos
+        function addVideoInput() {
+            const currentVideos = videosContainer.querySelectorAll('.video-input').length;
+            if (currentVideos < MAX_VIDEOS) {
+                const div = document.createElement('div');
+                div.className = 'video-input';
+                div.innerHTML = '<input type="file" accept="video/mp4" required>';
+                videosContainer.appendChild(div);
+            } else {
+                alert('No puedes añadir más de ' + MAX_VIDEOS + ' videos.');
+            }
+        }
+
+        // Generar HTML dinámico
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const recipeName = document.getElementById('recipeName').value;
+            const chefName = document.getElementById('chefName').value;
+            const ingredients = document.getElementById('ingredients').value.replace(/\n/g, '<br>');
+            const comments = document.getElementById('comments').value;
+            const videoFiles = videosContainer.querySelectorAll('input[type="file"]');
+
+            if (videoFiles.length === 0) {
+                alert('Por favor, sube al menos un video.');
+                return;
+            }
+
+            let videosHTML = '';
+            videoFiles.forEach((input, index) => {
+                const file = input.files[0];
+                if (file) {
+                    const videoURL = URL.createObjectURL(file);
+                    videosHTML += `
+                        <div class="slide">
+                            <video muted autoplay loop playsinline>
+                                <source src="${videoURL}" type="video/mp4">
+                                Tu navegador no soporta el elemento de video.
+                            </video>
+                            <div class="numero-animado">${index + 1}</div>
+                            <div class="descripcion">${comments}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${recipeName}</title>
+                </head>
+                <body>
+                    <h1>${recipeName}</h1>
+                    <h2>${chefName}</h2>
+                    <h3>Ingredientes</h3>
+                    <p>${ingredients}</p>
+                    <div class="carrusel">${videosHTML}</div>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${recipeName.replace(/\s+/g, '_')}.html`;
+            link.click();
+        });
+    </script>
+</body>
+</html>
