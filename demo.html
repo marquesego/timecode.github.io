@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel con Descripción e Ingredientes</title>
+    <title>Carrusel con Ingredientes y Deslizamiento</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -79,7 +79,6 @@
             font-size: 6rem;
             font-weight: 900;
             color: rgba(255, 204, 45, 0.9);
-            cursor: pointer;
             z-index: 10;
             line-height: 1;
         }
@@ -112,8 +111,8 @@
         }
         .ingredientes-btn {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
+            bottom: 10%;
+            right: 25%;
             cursor: pointer;
             z-index: 20;
             width: 50px;
@@ -200,10 +199,24 @@
                     Tu navegador no soporta el elemento de video.
                 </video>
                 <div class="contenido-superior">
-                    <div class="titulo">Carrot Cake</div>
+                    <div class="titulo">Pecan Pie</div>
                 </div>
                 <div class="numero-animado">2</div>
-                <div class="descripcion">Un pastel único y nutritivo.</div>
+                <div class="descripcion">Un pastel único y delicioso.</div>
+                <div class="icono-redondo">
+                    <img src="cocinero1.jpg" alt="Cocinero">
+                </div>
+            </div>
+            <div class="slide">
+                <video muted autoplay loop playsinline>
+                    <source src="video3.mp4" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+                <div class="contenido-superior">
+                    <div class="titulo">Pecan Pie</div>
+                </div>
+                <div class="numero-animado">3</div>
+                <div class="descripcion">Perfecto para cualquier ocasión.</div>
                 <div class="icono-redondo">
                     <img src="cocinero1.jpg" alt="Cocinero">
                 </div>
@@ -225,6 +238,17 @@
             const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
             ingredientesRecuadro.classList.toggle('mostrar');
         }
+
+        // Swipe para móviles
+        let startX = 0;
+        carrusel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+        carrusel.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            if (endX - startX > 50) cambiarSlide(-1); // Swipe derecha
+            else if (startX - endX > 50) cambiarSlide(1); // Swipe izquierda
+        });
     </script>
 </body>
 </html>
