@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel con Ingredientes</title>
+    <title>Carrusel con Animaciones</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -52,6 +52,10 @@
             text-transform: capitalize;
             color: rgba(255, 204, 45, 0.9);
         }
+        .contenido-superior .subtitulo {
+            font-size: 1.5rem;
+            color: #fff;
+        }
         .numero-animado {
             position: absolute;
             bottom: 10%;
@@ -61,6 +65,15 @@
             color: rgba(255, 204, 45, 0.9);
             z-index: 20;
             line-height: 1;
+            animation: zoom 2s infinite ease-in-out;
+        }
+        @keyframes zoom {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
         }
         .descripcion {
             position: absolute;
@@ -92,8 +105,8 @@
         }
         .ingredientes-btn {
             position: absolute;
-            bottom: 12%;
-            right: 25%;
+            top: 80px;
+            right: 10px;
             cursor: pointer;
             z-index: 20;
             width: 50px;
@@ -123,6 +136,9 @@
         @media (max-width: 768px) {
             .contenido-superior .titulo {
                 font-size: 2rem;
+            }
+            .contenido-superior .subtitulo {
+                font-size: 1rem;
             }
             .numero-animado {
                 font-size: 4rem;
@@ -182,8 +198,9 @@
         <!-- Textos y números animados -->
         <div class="contenido-superior">
             <div class="titulo">Pecan Pie</div>
+            <div class="subtitulo">Alma Obregón</div>
         </div>
-        <div class="numero-animado">1</div>
+        <div class="numero-animado" id="numero">1</div>
         <div class="descripcion">Receta clásica y deliciosa.</div>
         <div class="icono-redondo">
             <img src="cocinero1.jpg" alt="Cocinero">
@@ -192,12 +209,14 @@
 
     <script>
         const carrusel = document.getElementById('carrusel');
+        const numeroAnimado = document.getElementById('numero');
         let currentIndex = 0;
 
         function cambiarSlide(direccion) {
             const slides = carrusel.children.length;
             currentIndex = (currentIndex + direccion + slides) % slides;
             carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
+            numeroAnimado.textContent = currentIndex + 1;
         }
 
         function toggleIngredientes() {
