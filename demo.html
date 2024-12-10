@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel con Ingredientes y Deslizamiento</title>
+    <title>Carrusel con Ingredientes</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -44,33 +44,13 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 10;
+            z-index: 20;
         }
         .contenido-superior .titulo {
             font-family: 'Passion One', cursive;
             font-size: 3rem;
             text-transform: capitalize;
             color: rgba(255, 204, 45, 0.9);
-        }
-        .boton {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 10;
-        }
-        .boton.izquierda {
-            left: 10px;
-        }
-        .boton.derecha {
-            right: 10px;
         }
         .numero-animado {
             position: absolute;
@@ -79,7 +59,7 @@
             font-size: 6rem;
             font-weight: 900;
             color: rgba(255, 204, 45, 0.9);
-            z-index: 10;
+            z-index: 20;
             line-height: 1;
         }
         .descripcion {
@@ -92,6 +72,7 @@
             border-radius: 10px;
             font-size: 1.2rem;
             line-height: 1.5;
+            z-index: 20;
         }
         .icono-redondo {
             position: absolute;
@@ -102,7 +83,7 @@
             border-radius: 50%;
             overflow: hidden;
             border: 3px solid rgba(255, 204, 45, 0.9);
-            z-index: 10;
+            z-index: 20;
         }
         .icono-redondo img {
             width: 100%;
@@ -111,7 +92,7 @@
         }
         .ingredientes-btn {
             position: absolute;
-            bottom: 10%;
+            bottom: 12%;
             right: 25%;
             cursor: pointer;
             z-index: 20;
@@ -119,20 +100,22 @@
             height: 50px;
         }
         .ingredientes-recuadro {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 80%;
-            background: rgba(0, 0, 0, 0.85);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
             color: #fff;
             padding: 20px;
             border-radius: 15px;
             font-size: 1.2rem;
             line-height: 1.5;
-            display: none;
-            z-index: 30;
+            width: 300px;
+            max-height: 400px;
             overflow-y: auto;
+            display: none;
+            z-index: 50;
+            text-align: center;
         }
         .ingredientes-recuadro.mostrar {
             display: block;
@@ -155,7 +138,8 @@
     <div class="carrusel-container">
         <!-- Botón de ingredientes -->
         <img src="ingredientes.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
-        <div class="ingredientes-recuadro" id="ingredientes-recuadro">
+        <div class="ingredientes-recuadro" id="ingredientes-recuadro" onclick="toggleIngredientes()">
+            <h3>Ingredientes</h3>
             Para la base:<br>
             155 g de harina<br>
             1 cucharada de azúcar<br>
@@ -173,10 +157,6 @@
             280 g de nueces pecanas peladas
         </div>
 
-        <!-- Botones de navegación -->
-        <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
-        <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
-        
         <!-- Carrusel -->
         <div class="carrusel" id="carrusel">
             <div class="slide">
@@ -184,43 +164,29 @@
                     <source src="video1.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="contenido-superior">
-                    <div class="titulo">Pecan Pie</div>
-                </div>
-                <div class="numero-animado">1</div>
-                <div class="descripcion">Receta clásica y deliciosa.</div>
-                <div class="icono-redondo">
-                    <img src="cocinero1.jpg" alt="Cocinero">
-                </div>
             </div>
             <div class="slide">
                 <video muted autoplay loop playsinline>
                     <source src="video2.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="contenido-superior">
-                    <div class="titulo">Pecan Pie</div>
-                </div>
-                <div class="numero-animado">2</div>
-                <div class="descripcion">Un pastel único y delicioso.</div>
-                <div class="icono-redondo">
-                    <img src="cocinero1.jpg" alt="Cocinero">
-                </div>
             </div>
             <div class="slide">
                 <video muted autoplay loop playsinline>
                     <source src="video3.mp4" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="contenido-superior">
-                    <div class="titulo">Pecan Pie</div>
-                </div>
-                <div class="numero-animado">3</div>
-                <div class="descripcion">Perfecto para cualquier ocasión.</div>
-                <div class="icono-redondo">
-                    <img src="cocinero1.jpg" alt="Cocinero">
-                </div>
             </div>
+        </div>
+
+        <!-- Textos y números animados -->
+        <div class="contenido-superior">
+            <div class="titulo">Pecan Pie</div>
+        </div>
+        <div class="numero-animado">1</div>
+        <div class="descripcion">Receta clásica y deliciosa.</div>
+        <div class="icono-redondo">
+            <img src="cocinero1.jpg" alt="Cocinero">
         </div>
     </div>
 
