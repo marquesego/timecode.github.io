@@ -32,13 +32,12 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .form-group input, 
-        .form-group textarea, 
+        .form-group input,
+        .form-group textarea,
         .form-group button {
             width: 100%;
             padding: 10px;
             font-size: 16px;
-            margin-bottom: 10px;
         }
         .form-group textarea {
             height: 100px;
@@ -83,10 +82,10 @@
             <textarea id="comments" placeholder="Ej: Receta clásica y deliciosa" required></textarea>
         </div>
         <div class="form-group">
-            <label>Videos de los pasos (máximo 3):</label>
+            <label>Graba los videos de los pasos (máximo 3):</label>
             <div class="videos-container" id="videosContainer">
                 <div class="video-input">
-                    <input type="file" accept="video/mp4" required>
+                    <input type="file" accept="video/mp4" capture="environment" required>
                 </div>
             </div>
             <button type="button" onclick="addVideoInput()">Añadir otro video</button>
@@ -101,20 +100,20 @@
         const form = document.getElementById('recipeForm');
         const videosContainer = document.getElementById('videosContainer');
 
-        // Añadir otro input para subir videos
+        // Añadir otro input para grabar videos
         function addVideoInput() {
             const currentVideos = videosContainer.querySelectorAll('.video-input').length;
             if (currentVideos < MAX_VIDEOS) {
                 const div = document.createElement('div');
                 div.className = 'video-input';
-                div.innerHTML = '<input type="file" accept="video/mp4" required>';
+                div.innerHTML = '<input type="file" accept="video/mp4" capture="environment" required>';
                 videosContainer.appendChild(div);
             } else {
                 alert('No puedes añadir más de ' + MAX_VIDEOS + ' videos.');
             }
         }
 
-        // Generar HTML dinámico
+        // Generar HTML dinámico con estilos y carrusel
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -154,13 +153,24 @@
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>${recipeName}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; background: #000; color: #fff; margin: 0; overflow: hidden; }
+                        .carrusel-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+                        .carrusel { display: flex; transition: transform 0.5s ease-in-out; width: 100%; height: 100%; }
+                        .slide { flex: 0 0 100%; position: relative; width: 100%; height: 100%; }
+                        video { width: 100%; height: 100%; object-fit: cover; }
+                        .numero-animado { position: absolute; bottom: 10%; left: 10%; font-size: 6rem; font-weight: 900; color: rgba(255, 204, 45, 0.9); }
+                        .descripcion { position: absolute; bottom: 10%; left: 25%; background: rgba(0, 0, 0, 0.7); padding: 10px 15px; border-radius: 10px; font-size: 1.2rem; }
+                    </style>
                 </head>
                 <body>
-                    <h1>${recipeName}</h1>
-                    <h2>${chefName}</h2>
-                    <h3>Ingredientes</h3>
-                    <p>${ingredients}</p>
-                    <div class="carrusel">${videosHTML}</div>
+                    <div class="carrusel-container">
+                        <h1>${recipeName}</h1>
+                        <h2>${chefName}</h2>
+                        <div class="carrusel">${videosHTML}</div>
+                        <h3>Ingredientes</h3>
+                        <p>${ingredients}</p>
+                    </div>
                 </body>
                 </html>
             `;
