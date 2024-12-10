@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel Rediseñado y Elegante</title>
+    <title>Carrusel con Descripción e Ingredientes</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Passion+One:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -45,54 +45,12 @@
             top: 20px;
             left: 20px;
             z-index: 10;
-            text-align: left;
         }
         .contenido-superior .titulo {
             font-family: 'Passion One', cursive;
             font-size: 3rem;
             text-transform: capitalize;
             color: rgba(255, 204, 45, 0.9);
-            margin-bottom: 5px;
-        }
-        .contenido-superior .subtitulo {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .numero-animado {
-            position: absolute;
-            bottom: 10%;
-            left: 10%;
-            font-size: 8rem;
-            font-weight: 900;
-            color: rgba(255, 204, 45, 0.9);
-            cursor: pointer;
-            z-index: 10;
-            line-height: 1;
-            animation: zoom 2s infinite ease-in-out;
-        }
-        @keyframes zoom {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-        .icono-redondo {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid rgba(255, 204, 45, 0.9);
-            z-index: 10;
-        }
-        .icono-redondo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
         .boton {
             position: absolute;
@@ -114,27 +72,109 @@
         .boton.derecha {
             right: 10px;
         }
+        .numero-animado {
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            font-size: 6rem;
+            font-weight: 900;
+            color: rgba(255, 204, 45, 0.9);
+            cursor: pointer;
+            z-index: 10;
+            line-height: 1;
+        }
+        .descripcion {
+            position: absolute;
+            bottom: 10%;
+            left: 25%;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+        .icono-redondo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(255, 204, 45, 0.9);
+            z-index: 10;
+        }
+        .icono-redondo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .ingredientes-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 20;
+            width: 50px;
+            height: 50px;
+        }
+        .ingredientes-recuadro {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            display: none;
+            z-index: 30;
+            overflow-y: auto;
+        }
+        .ingredientes-recuadro.mostrar {
+            display: block;
+        }
         @media (max-width: 768px) {
             .contenido-superior .titulo {
                 font-size: 2rem;
             }
-            .contenido-superior .subtitulo {
-                font-size: 1rem;
-            }
             .numero-animado {
                 font-size: 4rem;
             }
-            .boton {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
+            .descripcion {
+                font-size: 1rem;
+                left: 20%;
             }
         }
     </style>
 </head>
 <body>
     <div class="carrusel-container">
-        <!-- Botones -->
+        <!-- Botón de ingredientes -->
+        <img src="ingredientes.png" alt="Ingredientes" class="ingredientes-btn" onclick="toggleIngredientes()">
+        <div class="ingredientes-recuadro" id="ingredientes-recuadro">
+            Para la base:<br>
+            155 g de harina<br>
+            1 cucharada de azúcar<br>
+            1/2 cucharadita de sal<br>
+            110 g de mantequilla fría en cubos<br>
+            35 ml de agua<br><br>
+            Para el relleno:<br>
+            3 huevos<br>
+            250 ml de sirope de arce<br>
+            50 g de azúcar blanco<br>
+            50 g de azúcar moreno<br>
+            10 g de harina<br>
+            60 g de mantequilla derretida<br>
+            1 pizca de sal<br>
+            280 g de nueces pecanas peladas
+        </div>
+
+        <!-- Botones de navegación -->
         <button class="boton izquierda" onclick="cambiarSlide(-1)">&#8249;</button>
         <button class="boton derecha" onclick="cambiarSlide(1)">&#8250;</button>
         
@@ -147,11 +187,11 @@
                 </video>
                 <div class="contenido-superior">
                     <div class="titulo">Pecan Pie</div>
-                    <div class="subtitulo">Alma Obregón</div>
                 </div>
                 <div class="numero-animado">1</div>
+                <div class="descripcion">Receta clásica y deliciosa.</div>
                 <div class="icono-redondo">
-                    <img src="chef1.jpg" alt="Chef">
+                    <img src="cocinero1.jpg" alt="Cocinero">
                 </div>
             </div>
             <div class="slide">
@@ -161,25 +201,11 @@
                 </video>
                 <div class="contenido-superior">
                     <div class="titulo">Carrot Cake</div>
-                    <div class="subtitulo">Jamie Oliver</div>
                 </div>
                 <div class="numero-animado">2</div>
+                <div class="descripcion">Un pastel único y nutritivo.</div>
                 <div class="icono-redondo">
-                    <img src="chef2.jpg" alt="Chef">
-                </div>
-            </div>
-            <div class="slide">
-                <video muted autoplay loop playsinline>
-                    <source src="video3.mp4" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
-                </video>
-                <div class="contenido-superior">
-                    <div class="titulo">Apple Pie</div>
-                    <div class="subtitulo">Mary Berry</div>
-                </div>
-                <div class="numero-animado">3</div>
-                <div class="icono-redondo">
-                    <img src="chef3.jpg" alt="Chef">
+                    <img src="cocinero1.jpg" alt="Cocinero">
                 </div>
             </div>
         </div>
@@ -189,30 +215,16 @@
         const carrusel = document.getElementById('carrusel');
         let currentIndex = 0;
 
-        // Cambiar slides
-        function cambiarSlide(direction) {
+        function cambiarSlide(direccion) {
             const slides = carrusel.children.length;
-            currentIndex = (currentIndex + direction + slides) % slides;
+            currentIndex = (currentIndex + direccion + slides) % slides;
             carrusel.style.transform = `translateX(-${currentIndex * 100}%)`;
         }
 
-        // Swipe para móviles
-        let startX = 0;
-        carrusel.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        });
-        carrusel.addEventListener('touchend', (e) => {
-            const endX = e.changedTouches[0].clientX;
-            if (endX - startX > 50) cambiarSlide(-1); // Swipe derecha
-            else if (startX - endX > 50) cambiarSlide(1); // Swipe izquierda
-        });
-
-        // Manejo de autoplay en iOS y Android
-        document.querySelectorAll('video').forEach(video => {
-            video.play().catch(() => {
-                console.log('Autoplay falló.');
-            });
-        });
+        function toggleIngredientes() {
+            const ingredientesRecuadro = document.getElementById('ingredientes-recuadro');
+            ingredientesRecuadro.classList.toggle('mostrar');
+        }
     </script>
 </body>
 </html>
