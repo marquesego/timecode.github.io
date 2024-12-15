@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FCP XML Audio Extractor</title>
+    <title>Extractor de Canciones de XML</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
         h1 { text-align: center; }
@@ -11,109 +11,92 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         th { background-color: #007BFF; color: white; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <h1>Extractor de Audio desde XML de Final Cut</h1>
+    <h1>Extractor de Canciones desde XML</h1>
     <input type="file" id="xmlFile" accept=".xml">
-    <input type="file" id="audioFiles" multiple accept="audio/*">
-    <button id="processBtn">Procesar XML y Cotejar Audio</button>
+    <button id="processBtn">Procesar XML</button>
 
     <table>
         <thead>
             <tr>
-                <th>Nombre de la Canción</th>
-                <th>Duración en XML</th>
-                <th>Duración Real (Audio)</th>
-                <th>Estado</th>
+                <th>Título</th>
+                <th>Artista</th>
+                <th>Inicio (Frames)</th>
+                <th>Fin (Frames)</th>
             </tr>
         </thead>
         <tbody id="resultTable"></tbody>
     </table>
 
-    <button id="exportBtn" class="hidden">Exportar a JSON</button>
+    <button id="exportBtn" style="display:none;">Exportar a JSON</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/networks.js"></script>
     <script>
         const xmlFileInput = document.getElementById("xmlFile");
-        const audioFilesInput = document.getElementById("audioFiles");
         const processBtn = document.getElementById("processBtn");
         const resultTable = document.getElementById("resultTable");
         const exportBtn = document.getElementById("exportBtn");
 
-        let xmlSongs = [];
-        let audioFiles = [];
+        let songData = [];
 
-        // Leer el archivo XML y parsearlo
+        // Procesar el archivo XML
         function parseXML(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const parser = new DOMParser();
                     const xml = parser.parseFromString(e.target.result, "text/xml");
-                    const songs = [];
-                    const elements = xml.getElementsByTagName("clipitem");
-                    for (let item of elements) {
-                        const name = item.getElementsByTagName("name")[0]?.textContent || "Sin Nombre";
-                        const duration = item.getElementsByTagName("duration")[0]?.textContent || "0";
-                        songs.push({ name, duration, realDuration: "-", status: "Pendiente" });
+                    const clips = xml.getElementsByTagName("clipitem");
+                    const results = [];
+
+                    for (let clip of clips) {
+                        const title = clip.getElementsByTagName("name")[0]?.textContent || "Desconocido";
+                        const artist = clip.getElementsByTagName("artist")[0]?.textContent || "No especificado";
+                        const start = clip.getElementsByTagName("start")[0]?.textContent || "0";
+                        const end = clip.getElementsByTagName("end")[0]?.textContent || "0";
+                        results.push({ title, artist, start, end });
                     }
-                    resolve(songs);
+                    resolve(results);
                 };
                 reader.readAsText(file);
             });
         }
 
-        // Cotejar los archivos de audio con las canciones del XML
-        async function matchAudioFiles() {
-            for (let song of xmlSongs) {
-                const file = audioFiles.find(f => f.name.includes(song.name));
-                if (file) {
-                    const metadata = await Networks.read(file);
-                    song.realDuration = Math.round(metadata.duration) + " s";
-                    song.status = "Coincidencia Exitosa";
-                } else {
-                    song.status = "No Encontrado";
-                }
-            }
-            renderTable();
-            exportBtn.classList.remove("hidden");
-        }
-
         // Renderizar los resultados en la tabla
-        function renderTable() {
+        function renderTable(data) {
             resultTable.innerHTML = "";
-            xmlSongs.forEach(song => {
+            data.forEach(song => {
                 const row = `<tr>
-                    <td>${song.name}</td>
-                    <td>${song.duration} s</td>
-                    <td>${song.realDuration}</td>
-                    <td>${song.status}</td>
+                    <td>${song.title}</td>
+                    <td>${song.artist}</td>
+                    <td>${song.start}</td>
+                    <td>${song.end}</td>
                 </tr>`;
                 resultTable.innerHTML += row;
             });
         }
 
-        // Exportar los resultados a JSON
+        // Exportar a JSON
         function exportToJSON() {
-            const blob = new Blob([JSON.stringify(xmlSongs, null, 2)], { type: "application/json" });
+            const blob = new Blob([JSON.stringify(songData, null, 2)], { type: "application/json" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "resultados_audio.json";
+            link.download = "canciones_secuencia.json";
             link.click();
         }
 
-        // Evento al procesar
+        // Evento principal
         processBtn.addEventListener("click", async () => {
             const xmlFile = xmlFileInput.files[0];
-            audioFiles = Array.from(audioFilesInput.files);
-            if (!xmlFile || audioFiles.length === 0) {
-                alert("Sube un archivo XML y los archivos de audio correspondientes.");
+            if (!xmlFile) {
+                alert("Por favor, sube un archivo XML.");
                 return;
             }
-            xmlSongs = await parseXML(xmlFile);
-            await matchAudioFiles();
+
+            songData = await parseXML(xmlFile);
+            renderTable(songData);
+            exportBtn.style.display = "block";
         });
 
         exportBtn.addEventListener("click", exportToJSON);
