@@ -3,174 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Cue Sheet Manager</title>
+    <title>FCP XML Audio Extractor</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-        }
-
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        input, button {
-            padding: 8px;
-            font-size: 1rem;
-        }
-
-        input[type="text"], input[type="number"], input[type="file"] {
-            width: 200px;
-        }
-
-        button {
-            cursor: pointer;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 3px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .delete-btn {
-            background-color: #dc3545;
-        }
-
-        .delete-btn:hover {
-            background-color: #b02a37;
-        }
-
-        #exportBtn {
-            display: block;
-            margin: 20px auto;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        h1 { text-align: center; }
+        input, button { margin: 10px 0; padding: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #007BFF; color: white; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <h1>Music Cue Sheet Manager</h1>
+    <h1>Extractor de Audio desde XML de Final Cut</h1>
+    <input type="file" id="xmlFile" accept=".xml">
+    <input type="file" id="audioFiles" multiple accept="audio/*">
+    <button id="processBtn">Procesar XML y Cotejar Audio</button>
 
-    <!-- Formulario para agregar pistas -->
-    <form id="cueSheetForm">
-        <input type="text" id="title" placeholder="Título de la Pista" required>
-        <input type="text" id="composer" placeholder="Compositor" required>
-        <input type="number" id="duration" placeholder="Duración (segundos)" required>
-        <input type="file" id="audioFile" accept="audio/*">
-        <button type="submit">Añadir Pista</button>
-    </form>
-
-    <!-- Tabla para mostrar las pistas -->
     <table>
         <thead>
             <tr>
-                <th>Título</th>
-                <th>Compositor</th>
-                <th>Duración</th>
-                <th>Acciones</th>
+                <th>Nombre de la Canción</th>
+                <th>Duración en XML</th>
+                <th>Duración Real (Audio)</th>
+                <th>Estado</th>
             </tr>
         </thead>
-        <tbody id="cueSheetTable"></tbody>
+        <tbody id="resultTable"></tbody>
     </table>
 
-    <!-- Botón para exportar los datos -->
-    <button id="exportBtn">Exportar a JSON</button>
+    <button id="exportBtn" class="hidden">Exportar a JSON</button>
 
-    <!-- Script principal -->
+    <script src="https://cdn.jsdelivr.net/npm/networks.js"></script>
     <script>
-        const form = document.getElementById("cueSheetForm");
-        const tableBody = document.getElementById("cueSheetTable");
+        const xmlFileInput = document.getElementById("xmlFile");
+        const audioFilesInput = document.getElementById("audioFiles");
+        const processBtn = document.getElementById("processBtn");
+        const resultTable = document.getElementById("resultTable");
         const exportBtn = document.getElementById("exportBtn");
 
-        let cueSheetData = [];
+        let xmlSongs = [];
+        let audioFiles = [];
 
-        // Añadir pista al cue sheet
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const title = document.getElementById("title").value;
-            const composer = document.getElementById("composer").value;
-            let duration = parseInt(document.getElementById("duration").value);
-            const file = document.getElementById("audioFile").files[0];
-
-            // Procesar archivo de audio para obtener la duración (si se sube un archivo)
-            if (file) {
-                duration = await getAudioDuration(file);
-            }
-
-            // Crear nueva pista
-            const newCue = { title, composer, duration };
-            cueSheetData.push(newCue);
-            renderTable();
-            form.reset();
-        });
-
-        // Función para procesar archivos de audio y obtener duración
-        function getAudioDuration(file) {
+        // Leer el archivo XML y parsearlo
+        function parseXML(file) {
             return new Promise((resolve) => {
-                const audio = new Audio();
-                audio.src = URL.createObjectURL(file);
-                audio.onloadedmetadata = () => {
-                    resolve(Math.round(audio.duration));
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(e.target.result, "text/xml");
+                    const songs = [];
+                    const elements = xml.getElementsByTagName("clipitem");
+                    for (let item of elements) {
+                        const name = item.getElementsByTagName("name")[0]?.textContent || "Sin Nombre";
+                        const duration = item.getElementsByTagName("duration")[0]?.textContent || "0";
+                        songs.push({ name, duration, realDuration: "-", status: "Pendiente" });
+                    }
+                    resolve(songs);
                 };
+                reader.readAsText(file);
             });
         }
 
-        // Renderizar la tabla
-        function renderTable() {
-            tableBody.innerHTML = "";
-            cueSheetData.forEach((cue, index) => {
-                const row = `<tr>
-                    <td>${cue.title}</td>
-                    <td>${cue.composer}</td>
-                    <td>${cue.duration} s</td>
-                    <td><button class="delete-btn" onclick="deleteCue(${index})">Eliminar</button></td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
-
-        // Eliminar pista
-        function deleteCue(index) {
-            cueSheetData.splice(index, 1);
+        // Cotejar los archivos de audio con las canciones del XML
+        async function matchAudioFiles() {
+            for (let song of xmlSongs) {
+                const file = audioFiles.find(f => f.name.includes(song.name));
+                if (file) {
+                    const metadata = await Networks.read(file);
+                    song.realDuration = Math.round(metadata.duration) + " s";
+                    song.status = "Coincidencia Exitosa";
+                } else {
+                    song.status = "No Encontrado";
+                }
+            }
             renderTable();
+            exportBtn.classList.remove("hidden");
         }
 
-        // Exportar datos a JSON
-        exportBtn.addEventListener("click", () => {
-            const blob = new Blob([JSON.stringify(cueSheetData, null, 2)], { type: "application/json" });
+        // Renderizar los resultados en la tabla
+        function renderTable() {
+            resultTable.innerHTML = "";
+            xmlSongs.forEach(song => {
+                const row = `<tr>
+                    <td>${song.name}</td>
+                    <td>${song.duration} s</td>
+                    <td>${song.realDuration}</td>
+                    <td>${song.status}</td>
+                </tr>`;
+                resultTable.innerHTML += row;
+            });
+        }
+
+        // Exportar los resultados a JSON
+        function exportToJSON() {
+            const blob = new Blob([JSON.stringify(xmlSongs, null, 2)], { type: "application/json" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "cue_sheet.json";
+            link.download = "resultados_audio.json";
             link.click();
+        }
+
+        // Evento al procesar
+        processBtn.addEventListener("click", async () => {
+            const xmlFile = xmlFileInput.files[0];
+            audioFiles = Array.from(audioFilesInput.files);
+            if (!xmlFile || audioFiles.length === 0) {
+                alert("Sube un archivo XML y los archivos de audio correspondientes.");
+                return;
+            }
+            xmlSongs = await parseXML(xmlFile);
+            await matchAudioFiles();
         });
+
+        exportBtn.addEventListener("click", exportToJSON);
     </script>
 </body>
 </html>
