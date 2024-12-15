@@ -5,54 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Video</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            text-align: center;
-        }
-        video {
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 10px;
-        }
-        button {
-            margin: 5px;
-            padding: 10px;
-            font-size: 16px;
-        }
-        #preview {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        #preview video {
-            margin: 5px;
-            width: 30%;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        video { width: 100%; max-width: 400px; margin-bottom: 10px; }
+        button { margin: 5px; padding: 10px; font-size: 16px; }
+        #preview { display: flex; flex-wrap: wrap; justify-content: center; }
+        #preview video { margin: 5px; width: 30%; }
     </style>
 </head>
 <body>
-    <h1>Editor de Video: Graba, Edita y Une</h1>
-    
-    <!-- Grabación de video -->
+    <h1>Editor de Video Móvil</h1>
+
     <div>
         <video id="camera" autoplay muted></video><br>
         <button id="startRec">Iniciar Grabación</button>
         <button id="stopRec" disabled>Detener Grabación</button>
     </div>
 
-    <!-- Videos grabados -->
     <h3>Videos Grabados:</h3>
     <div id="preview"></div>
     <button id="mergeVideos">Unir Videos</button>
 
-    <!-- Video final unido -->
     <h3>Video Final:</h3>
     <video id="finalVideo" controls></video>
 
-    <!-- Librería FFmpeg.js -->
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js"></script>
-
     <script>
         const camera = document.getElementById("camera");
         const startRec = document.getElementById("startRec");
@@ -69,9 +45,8 @@
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then(stream => {
                 camera.srcObject = stream;
-
-                // Configurar grabadora
                 mediaRecorder = new MediaRecorder(stream);
+
                 mediaRecorder.ondataavailable = (e) => videoChunks.push(e.data);
                 mediaRecorder.onstop = () => {
                     const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
@@ -80,9 +55,9 @@
                     videoChunks = [];
                 };
             })
-            .catch(err => console.error("Error al acceder a la cámara:", err));
+            .catch(err => alert("Error al acceder a la cámara: " + err.message));
 
-        // Funciones de grabación
+        // Botones de grabación
         startRec.onclick = () => {
             mediaRecorder.start();
             startRec.disabled = true;
@@ -95,7 +70,7 @@
             stopRec.disabled = true;
         };
 
-        // Renderiza los videos grabados
+        // Mostrar videos grabados
         function renderVideo(blob) {
             const url = URL.createObjectURL(blob);
             const vid = document.createElement("video");
@@ -104,56 +79,46 @@
             preview.appendChild(vid);
         }
 
-        // Une los videos usando FFmpeg
+        // Unir videos con FFmpeg
         mergeVideos.onclick = async () => {
-    if (videos.length < 2) {
-        alert("Debes grabar al menos 2 videos para unir.");
-        return;
-    }
+            if (videos.length < 2) {
+                alert("Debes grabar al menos 2 videos para unir.");
+                return;
+            }
 
-    console.log("Cargando FFmpeg...");
-    const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({
-        log: true,
-        corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
-    });
+            const { createFFmpeg, fetchFile } = FFmpeg;
+            const ffmpeg = createFFmpeg({
+                log: true,
+                corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
+            });
 
-    await ffmpeg.load();
-    console.log("FFmpeg cargado correctamente.");
+            alert("Cargando FFmpeg, por favor espera...");
+            await ffmpeg.load();
 
-    try {
-        // Cargar videos en FFmpeg
-        for (let i = 0; i < videos.length; i++) {
-            console.log(`Cargando video ${i} en FFmpeg...`);
-            await ffmpeg.FS("writeFile", `input${i}.webm`, await fetchFile(videos[i]));
-        }
+            try {
+                for (let i = 0; i < videos.length; i++) {
+                    await ffmpeg.FS("writeFile", `input${i}.webm`, await fetchFile(videos[i]));
+                }
 
-        // Crear archivo de concatenación
-        let concatFile = "ffconcat version 1.0\n";
-        for (let i = 0; i < videos.length; i++) {
-            concatFile += `file 'input${i}.webm'\n`;
-        }
-        ffmpeg.FS("writeFile", "concat.txt", concatFile);
+                let concatFile = "ffconcat version 1.0\n";
+                for (let i = 0; i < videos.length; i++) {
+                    concatFile += `file 'input${i}.webm'\n`;
+                }
+                ffmpeg.FS("writeFile", "concat.txt", concatFile);
 
-        // Ejecutar FFmpeg
-        console.log("Unificando videos con FFmpeg...");
-        await ffmpeg.run(
-            "-f", "concat", "-safe", "0", "-i", "concat.txt", 
-            "-c", "copy", "output.webm"
-        );
+                await ffmpeg.run(
+                    "-f", "concat", "-safe", "0", "-i", "concat.txt", 
+                    "-c", "copy", "output.webm"
+                );
 
-        // Mostrar el video final
-        const data = ffmpeg.FS("readFile", "output.webm");
-        const finalBlob = new Blob([data.buffer], { type: "video/webm" });
-        finalVideo.src = URL.createObjectURL(finalBlob);
-        console.log("¡Videos unidos exitosamente!");
-        alert("¡Videos unidos exitosamente!");
-    } catch (error) {
-        console.error("Error al unir los videos:", error);
-        alert("Ocurrió un error al unir los videos. Revisa la consola para más detalles.");
-    }
-};
-
+                const data = ffmpeg.FS("readFile", "output.webm");
+                const finalBlob = new Blob([data.buffer], { type: "video/webm" });
+                finalVideo.src = URL.createObjectURL(finalBlob);
+                alert("¡Videos unidos exitosamente!");
+            } catch (error) {
+                alert("Error al unir videos: " + error.message);
+            }
+        };
     </script>
 </body>
 </html>
