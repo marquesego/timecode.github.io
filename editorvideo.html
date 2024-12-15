@@ -3,120 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrusel de Videos</title>
+    <title>Galería Carrusel de Videos</title>
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background-color: #000;
             color: #fff;
-            overflow-x: hidden;
-        }
-
-        h1 {
             text-align: center;
         }
 
-        /* Contenedor del carrusel */
-        .carousel {
+        h1 {
+            margin: 10px;
+        }
+
+        /* Video y botones */
+        video {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+            display: block;
+            background: #333;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Estilos del carrusel */
+        .carousel-container {
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
-            width: 100%;
-            height: 300px;
-        }
-
-        .carousel::-webkit-scrollbar {
-            display: none; /* Ocultar barra de desplazamiento */
-        }
-
-        .carousel video {
-            scroll-snap-align: start;
-            width: 100%;
-            max-width: 400px;
-            flex-shrink: 0;
-            margin: 0 10px;
+            margin-top: 20px;
+            background-color: #111;
+            padding: 10px 0;
             border-radius: 10px;
-            background: #000;
         }
 
-        /* Botón de pantalla completa */
-        .fullscreen-button {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        /* Centrado de carrusel */
-        .carousel-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            margin: 20px auto;
+        .carousel-container video {
+            scroll-snap-align: start;
+            width: 90%;
+            max-width: 300px;
+            margin: 10px;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Carrusel de Videos en Bucle</h1>
+    <h1>Graba Videos y Crea un Carrusel</h1>
 
-    <!-- Contenedor del carrusel -->
-    <div class="carousel-container">
-        <div class="carousel" id="carousel">
-            <!-- Los videos grabados aparecerán aquí -->
-        </div>
+    <!-- Cámara y grabación -->
+    <video id="camera" autoplay muted></video>
+    <div>
+        <button id="startRec">Iniciar Grabación</button>
+        <button id="stopRec" disabled>Detener Grabación</button>
+        <button id="createCarousel">Crear Carrusel</button>
     </div>
 
+    <!-- Carrusel -->
+    <h2 style="display: none;" id="galleryTitle">Carrusel de Videos</h2>
+    <div class="carousel-container" id="carousel"></div>
+
     <script>
+        const camera = document.getElementById("camera");
+        const startRec = document.getElementById("startRec");
+        const stopRec = document.getElementById("stopRec");
+        const createCarousel = document.getElementById("createCarousel");
         const carousel = document.getElementById("carousel");
+        const galleryTitle = document.getElementById("galleryTitle");
 
-        // Array de videos de ejemplo (puedes reemplazarlo por tus videos grabados)
-        const videoSources = [
-            "https://www.w3schools.com/html/mov_bbb.mp4", // Video de prueba 1
-            "https://www.w3schools.com/html/movie.mp4",   // Video de prueba 2
-            "https://www.w3schools.com/html/mov_bbb.mp4"  // Video de prueba 3
-        ];
+        let mediaRecorder;
+        let recordedChunks = [];
+        const recordedVideos = []; // Almacena los videos grabados
 
-        // Crear videos en el carrusel
-        videoSources.forEach(src => {
-            const video = document.createElement("video");
-            video.src = src;
-            video.controls = true;
-            video.loop = true;
-            video.muted = false;
-            video.autoplay = true;
+        // Acceder a la cámara
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                camera.srcObject = stream;
+                mediaRecorder = new MediaRecorder(stream);
 
-            // Pantalla completa al hacer clic
-            video.addEventListener("click", () => {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) { // Para Safari
-                    video.webkitRequestFullscreen();
-                } else if (video.msRequestFullscreen) { // Para IE
-                    video.msRequestFullscreen();
-                }
+                // Almacenar los datos de video grabados
+                mediaRecorder.ondataavailable = (e) => recordedChunks.push(e.data);
+
+                // Crear el blob del video al detener la grabación
+                mediaRecorder.onstop = () => {
+                    const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
+                    recordedVideos.push(videoBlob);
+                    recordedChunks = [];
+                    alert("¡Video grabado correctamente!");
+                };
+            })
+            .catch(err => alert("Error al acceder a la cámara: " + err.message));
+
+        // Botones de grabación
+        startRec.onclick = () => {
+            mediaRecorder.start();
+            startRec.disabled = true;
+            stopRec.disabled = false;
+        };
+
+        stopRec.onclick = () => {
+            mediaRecorder.stop();
+            startRec.disabled = false;
+            stopRec.disabled = true;
+        };
+
+        // Crear el carrusel
+        createCarousel.onclick = () => {
+            if (recordedVideos.length === 0) {
+                alert("¡Graba al menos un video antes de crear el carrusel!");
+                return;
+            }
+
+            // Limpiar el carrusel anterior
+            carousel.innerHTML = "";
+
+            // Añadir videos al carrusel
+            recordedVideos.forEach(videoBlob => {
+                const videoElement = document.createElement("video");
+                videoElement.src = URL.createObjectURL(videoBlob);
+                videoElement.controls = true;
+
+                // Permitir pantalla completa al hacer clic
+                videoElement.addEventListener("click", () => {
+                    if (videoElement.requestFullscreen) {
+                        videoElement.requestFullscreen();
+                    } else if (videoElement.webkitRequestFullscreen) {
+                        videoElement.webkitRequestFullscreen();
+                    }
+                });
+
+                carousel.appendChild(videoElement);
             });
 
-            carousel.appendChild(video);
-        });
-
-        // Desplazamiento automático en bucle
-        let scrollAmount = 0;
-        setInterval(() => {
-            scrollAmount += 1; // Velocidad de desplazamiento
-            if (scrollAmount >= carousel.scrollWidth / 2) {
-                scrollAmount = 0; // Reinicia el desplazamiento
-            }
-            carousel.scrollLeft = scrollAmount;
-        }, 50); // Velocidad en milisegundos
+            // Mostrar el carrusel
+            galleryTitle.style.display = "block";
+            carousel.style.display = "flex";
+        };
     </script>
 </body>
 </html>
