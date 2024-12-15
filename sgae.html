@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Cue Sheet Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        input, button {
+            padding: 8px;
+            font-size: 1rem;
+        }
+
+        input[type="text"], input[type="number"], input[type="file"] {
+            width: 200px;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background-color: #b02a37;
+        }
+
+        #exportBtn {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Music Cue Sheet Manager</h1>
+
+    <!-- Formulario para agregar pistas -->
+    <form id="cueSheetForm">
+        <input type="text" id="title" placeholder="Título de la Pista" required>
+        <input type="text" id="composer" placeholder="Compositor" required>
+        <input type="number" id="duration" placeholder="Duración (segundos)" required>
+        <input type="file" id="audioFile" accept="audio/*">
+        <button type="submit">Añadir Pista</button>
+    </form>
+
+    <!-- Tabla para mostrar las pistas -->
+    <table>
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Compositor</th>
+                <th>Duración</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cueSheetTable"></tbody>
+    </table>
+
+    <!-- Botón para exportar los datos -->
+    <button id="exportBtn">Exportar a JSON</button>
+
+    <!-- Script principal -->
+    <script>
+        const form = document.getElementById("cueSheetForm");
+        const tableBody = document.getElementById("cueSheetTable");
+        const exportBtn = document.getElementById("exportBtn");
+
+        let cueSheetData = [];
+
+        // Añadir pista al cue sheet
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const title = document.getElementById("title").value;
+            const composer = document.getElementById("composer").value;
+            let duration = parseInt(document.getElementById("duration").value);
+            const file = document.getElementById("audioFile").files[0];
+
+            // Procesar archivo de audio para obtener la duración (si se sube un archivo)
+            if (file) {
+                duration = await getAudioDuration(file);
+            }
+
+            // Crear nueva pista
+            const newCue = { title, composer, duration };
+            cueSheetData.push(newCue);
+            renderTable();
+            form.reset();
+        });
+
+        // Función para procesar archivos de audio y obtener duración
+        function getAudioDuration(file) {
+            return new Promise((resolve) => {
+                const audio = new Audio();
+                audio.src = URL.createObjectURL(file);
+                audio.onloadedmetadata = () => {
+                    resolve(Math.round(audio.duration));
+                };
+            });
+        }
+
+        // Renderizar la tabla
+        function renderTable() {
+            tableBody.innerHTML = "";
+            cueSheetData.forEach((cue, index) => {
+                const row = `<tr>
+                    <td>${cue.title}</td>
+                    <td>${cue.composer}</td>
+                    <td>${cue.duration} s</td>
+                    <td><button class="delete-btn" onclick="deleteCue(${index})">Eliminar</button></td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Eliminar pista
+        function deleteCue(index) {
+            cueSheetData.splice(index, 1);
+            renderTable();
+        }
+
+        // Exportar datos a JSON
+        exportBtn.addEventListener("click", () => {
+            const blob = new Blob([JSON.stringify(cueSheetData, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "cue_sheet.json";
+            link.click();
+        });
+    </script>
+</body>
+</html>
