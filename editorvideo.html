@@ -3,122 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Video</title>
+    <title>Carrusel de Videos</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
-        video { width: 100%; max-width: 400px; margin-bottom: 10px; }
-        button { margin: 5px; padding: 10px; font-size: 16px; }
-        #preview { display: flex; flex-wrap: wrap; justify-content: center; }
-        #preview video { margin: 5px; width: 30%; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* Contenedor del carrusel */
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            width: 100%;
+            height: 300px;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none; /* Ocultar barra de desplazamiento */
+        }
+
+        .carousel video {
+            scroll-snap-align: start;
+            width: 100%;
+            max-width: 400px;
+            flex-shrink: 0;
+            margin: 0 10px;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        /* Botón de pantalla completa */
+        .fullscreen-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Centrado de carrusel */
+        .carousel-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
-    <h1>Editor de Video Móvil</h1>
+    <h1>Carrusel de Videos en Bucle</h1>
 
-    <div>
-        <video id="camera" autoplay muted></video><br>
-        <button id="startRec">Iniciar Grabación</button>
-        <button id="stopRec" disabled>Detener Grabación</button>
+    <!-- Contenedor del carrusel -->
+    <div class="carousel-container">
+        <div class="carousel" id="carousel">
+            <!-- Los videos grabados aparecerán aquí -->
+        </div>
     </div>
 
-    <h3>Videos Grabados:</h3>
-    <div id="preview"></div>
-    <button id="mergeVideos">Unir Videos</button>
-
-    <h3>Video Final:</h3>
-    <video id="finalVideo" controls></video>
-
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js"></script>
     <script>
-        const camera = document.getElementById("camera");
-        const startRec = document.getElementById("startRec");
-        const stopRec = document.getElementById("stopRec");
-        const mergeVideos = document.getElementById("mergeVideos");
-        const preview = document.getElementById("preview");
-        const finalVideo = document.getElementById("finalVideo");
+        const carousel = document.getElementById("carousel");
 
-        let mediaRecorder;
-        let videoChunks = [];
-        let videos = [];
+        // Array de videos de ejemplo (puedes reemplazarlo por tus videos grabados)
+        const videoSources = [
+            "https://www.w3schools.com/html/mov_bbb.mp4", // Video de prueba 1
+            "https://www.w3schools.com/html/movie.mp4",   // Video de prueba 2
+            "https://www.w3schools.com/html/mov_bbb.mp4"  // Video de prueba 3
+        ];
 
-        // Acceder a la cámara
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            .then(stream => {
-                camera.srcObject = stream;
-                mediaRecorder = new MediaRecorder(stream);
+        // Crear videos en el carrusel
+        videoSources.forEach(src => {
+            const video = document.createElement("video");
+            video.src = src;
+            video.controls = true;
+            video.loop = true;
+            video.muted = false;
+            video.autoplay = true;
 
-                mediaRecorder.ondataavailable = (e) => videoChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
-                    videos.push(videoBlob);
-                    renderVideo(videoBlob);
-                    videoChunks = [];
-                };
-            })
-            .catch(err => alert("Error al acceder a la cámara: " + err.message));
-
-        // Botones de grabación
-        startRec.onclick = () => {
-            mediaRecorder.start();
-            startRec.disabled = true;
-            stopRec.disabled = false;
-        };
-
-        stopRec.onclick = () => {
-            mediaRecorder.stop();
-            startRec.disabled = false;
-            stopRec.disabled = true;
-        };
-
-        // Mostrar videos grabados
-        function renderVideo(blob) {
-            const url = URL.createObjectURL(blob);
-            const vid = document.createElement("video");
-            vid.src = url;
-            vid.controls = true;
-            preview.appendChild(vid);
-        }
-
-        // Unir videos con FFmpeg
-        mergeVideos.onclick = async () => {
-            if (videos.length < 2) {
-                alert("Debes grabar al menos 2 videos para unir.");
-                return;
-            }
-
-            const { createFFmpeg, fetchFile } = FFmpeg;
-            const ffmpeg = createFFmpeg({
-                log: true,
-                corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
+            // Pantalla completa al hacer clic
+            video.addEventListener("click", () => {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) { // Para Safari
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) { // Para IE
+                    video.msRequestFullscreen();
+                }
             });
 
-            alert("Cargando FFmpeg, por favor espera...");
-            await ffmpeg.load();
+            carousel.appendChild(video);
+        });
 
-            try {
-                for (let i = 0; i < videos.length; i++) {
-                    await ffmpeg.FS("writeFile", `input${i}.webm`, await fetchFile(videos[i]));
-                }
-
-                let concatFile = "ffconcat version 1.0\n";
-                for (let i = 0; i < videos.length; i++) {
-                    concatFile += `file 'input${i}.webm'\n`;
-                }
-                ffmpeg.FS("writeFile", "concat.txt", concatFile);
-
-                await ffmpeg.run(
-                    "-f", "concat", "-safe", "0", "-i", "concat.txt", 
-                    "-c", "copy", "output.webm"
-                );
-
-                const data = ffmpeg.FS("readFile", "output.webm");
-                const finalBlob = new Blob([data.buffer], { type: "video/webm" });
-                finalVideo.src = URL.createObjectURL(finalBlob);
-                alert("¡Videos unidos exitosamente!");
-            } catch (error) {
-                alert("Error al unir videos: " + error.message);
+        // Desplazamiento automático en bucle
+        let scrollAmount = 0;
+        setInterval(() => {
+            scrollAmount += 1; // Velocidad de desplazamiento
+            if (scrollAmount >= carousel.scrollWidth / 2) {
+                scrollAmount = 0; // Reinicia el desplazamiento
             }
-        };
+            carousel.scrollLeft = scrollAmount;
+        }, 50); // Velocidad en milisegundos
     </script>
 </body>
 </html>
