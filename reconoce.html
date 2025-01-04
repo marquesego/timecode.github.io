@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento de Objetos</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    video {
+      border: 2px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reconocimiento de Objetos</h1>
+  <video id="webcam" autoplay playsinline width="640" height="480"></video>
+  <canvas id="overlay" width="640" height="480"></canvas>
+  <script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('overlay');
+    const ctx = canvas.getContext('2d');
+
+    async function setupCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => resolve(video);
+        });
+      } catch (error) {
+        alert('Error accediendo a la cámara: ' + error.message);
+      }
+    }
+
+    async function loadModelAndDetect() {
+      const model = await cocoSsd.load();
+      console.log('Modelo cargado');
+      
+      async function detectFrame() {
+        const predictions = await model.detect(video);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        predictions.forEach(prediction => {
+          // Dibuja el rectángulo alrededor del objeto
+          ctx.strokeStyle = 'red';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(
+            prediction.bbox[0],
+            prediction.bbox[1],
+            prediction.bbox[2],
+            prediction.bbox[3]
+          );
+
+          // Muestra el nombre del objeto y la probabilidad
+          ctx.fillStyle = 'red';
+          ctx.font = '18px Arial';
+          ctx.fillText(
+            `${prediction.class} (${Math.round(prediction.score * 100)}%)`,
+            prediction.bbox[0],
+            prediction.bbox[1] > 20 ? prediction.bbox[1] - 5 : 20
+          );
+        });
+
+        requestAnimationFrame(detectFrame);
+      }
+
+      detectFrame();
+    }
+
+    async function main() {
+      await setupCamera();
+      await loadModelAndDetect();
+    }
+
+    main();
+  </script>
+</body>
+</html>
