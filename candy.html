@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Crush</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 5px;
+            margin: 20px auto;
+            width: max-content;
+            border: 2px solid #333;
+            background-color: #fff;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            font-size: 32px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            user-select: none;
+            background-color: #f9f9f9;
+            transition: transform 0.2s ease, opacity 0.3s ease;
+        }
+
+        .tile.match {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Emoji Crush</h1>
+    <p>Puntuación: <span id="score">0</span></p>
+    <div id="game-board"></div>
+    <audio id="match-sound" src="ok.mp3"></audio>
+    <script>
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score');
+        const matchSound = document.getElementById('match-sound');
+
+        const emojis = ['🍎', '🍇', '🍊', '🍉', '🍌', '🍓', '🍍', '🥝'];
+        const gridSize = 8;
+        let grid = [];
+        let score = 0;
+        let draggedTile, replacedTile;
+
+        // Crear el tablero
+        function createBoard() {
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                tile.setAttribute('id', i);
+
+                // Agregar eventos de arrastrar
+                tile.setAttribute('draggable', true);
+                tile.addEventListener('dragstart', dragStart);
+                tile.addEventListener('dragover', dragOver);
+                tile.addEventListener('dragenter', dragEnter);
+                tile.addEventListener('dragleave', dragLeave);
+                tile.addEventListener('drop', dragDrop);
+                tile.addEventListener('dragend', dragEnd);
+
+                gameBoard.appendChild(tile);
+                grid.push(tile);
+            }
+        }
+
+        // Eventos de arrastrar
+        function dragStart() {
+            draggedTile = this;
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+        }
+
+        function dragEnter(e) {
+            e.preventDefault();
+        }
+
+        function dragLeave() {}
+
+        function dragDrop() {
+            replacedTile = this;
+        }
+
+        function dragEnd() {
+            const draggedId = parseInt(draggedTile.getAttribute('id'));
+            const replacedId = parseInt(replacedTile.getAttribute('id'));
+
+            const validMoves = [
+                draggedId - 1,
+                draggedId + 1,
+                draggedId - gridSize,
+                draggedId + gridSize
+            ];
+
+            if (validMoves.includes(replacedId)) {
+                swapEmojis(draggedId, replacedId);
+                checkForMatches();
+            } else {
+                resetTiles();
+            }
+        }
+
+        // Intercambiar emojis
+        function swapEmojis(draggedId, replacedId) {
+            const draggedContent = draggedTile.textContent;
+            const replacedContent = replacedTile.textContent;
+
+            draggedTile.textContent = replacedContent;
+            replacedTile.textContent = draggedContent;
+        }
+
+        // Restaurar si no es válido
+        function resetTiles() {
+            draggedTile = null;
+            replacedTile = null;
+        }
+
+        // Detectar combinaciones
+        function checkForMatches() {
+            let matches = [];
+
+            // Detectar combinaciones horizontales
+            for (let i = 0; i < grid.length - 2; i++) {
+                const rowStart = Math.floor(i / gridSize) * gridSize;
+                const rowEnd = rowStart + gridSize - 1;
+
+                if (
+                    grid[i].textContent === grid[i + 1].textContent &&
+                    grid[i].textContent === grid[i + 2].textContent &&
+                    i + 2 <= rowEnd
+                ) {
+                    matches.push(i, i + 1, i + 2);
+                }
+            }
+
+            // Detectar combinaciones verticales
+            for (let i = 0; i < grid.length - gridSize * 2; i++) {
+                if (
+                    grid[i].textContent === grid[i + gridSize].textContent &&
+                    grid[i].textContent === grid[i + gridSize * 2].textContent
+                ) {
+                    matches.push(i, i + gridSize, i + gridSize * 2);
+                }
+            }
+
+            if (matches.length > 0) {
+                handleMatch(matches);
+            }
+        }
+
+        // Manejar combinaciones
+        function handleMatch(indices) {
+            indices.forEach((index) => {
+                const tile = grid[index];
+                tile.classList.add('match'); // Aplicar efecto visual
+                setTimeout(() => {
+                    tile.classList.remove('match');
+                    tile.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                }, 300);
+            });
+
+            score += indices.length;
+            scoreDisplay.textContent = score;
+
+            // Reproducir sonido
+            matchSound.currentTime = 0;
+            matchSound.play();
+        }
+
+        // Inicializar el juego
+        createBoard();
+    </script>
+</body>
+</html>
