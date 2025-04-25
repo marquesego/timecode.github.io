@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carta Interactiva con QR</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode.min.js"></script>
+  <title>Carta de Restaurante con Generación de QR</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      margin: 20px;
     }
-    #menu-items {
-      margin-bottom: 20px;
+    .plato {
+      margin-bottom: 10px;
     }
-    #qr-code {
+    #qrContainer {
       margin-top: 20px;
     }
   </style>
@@ -22,83 +21,105 @@
 
   <h1>Carta del Restaurante</h1>
 
-  <form id="menu-form">
-    <div id="menu-items"></div>
+  <!-- Lista de platos -->
+  <div id="carta">
+    <div class="plato">
+      <input type="checkbox" id="plato1" data-nombre="Ensalada César">
+      <label for="plato1">Ensalada César</label>
+      <input type="number" id="cantidad1" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato2" data-nombre="Pizza Margarita">
+      <label for="plato2">Pizza Margarita</label>
+      <input type="number" id="cantidad2" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato3" data-nombre="Pasta Bolognesa">
+      <label for="plato3">Pasta Bolognesa</label>
+      <input type="number" id="cantidad3" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato4" data-nombre="Lasaña de Carne">
+      <label for="plato4">Lasaña de Carne</label>
+      <input type="number" id="cantidad4" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato5" data-nombre="Sopa de Marisco">
+      <label for="plato5">Sopa de Marisco</label>
+      <input type="number" id="cantidad5" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato6" data-nombre="Paella Valenciana">
+      <label for="plato6">Paella Valenciana</label>
+      <input type="number" id="cantidad6" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato7" data-nombre="Tacos de Carne">
+      <label for="plato7">Tacos de Carne</label>
+      <input type="number" id="cantidad7" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato8" data-nombre="Hamburguesa Gourmet">
+      <label for="plato8">Hamburguesa Gourmet</label>
+      <input type="number" id="cantidad8" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato9" data-nombre="Filete a la Parrilla">
+      <label for="plato9">Filete a la Parrilla</label>
+      <input type="number" id="cantidad9" min="1" value="1" style="width: 50px;">
+    </div>
+    <div class="plato">
+      <input type="checkbox" id="plato10" data-nombre="Ceviche">
+      <label for="plato10">Ceviche</label>
+      <input type="number" id="cantidad10" min="1" value="1" style="width: 50px;">
+    </div>
+  </div>
 
-    <button type="submit">Generar QR con Comanda</button>
-  </form>
+  <!-- Botón para generar QR -->
+  <button id="generateQR">Generar Comanda en QR</button>
 
-  <div id="qr-code"></div>
+  <!-- Área donde se muestra el QR -->
+  <div id="qrContainer">
+    <!-- El QR aparecerá aquí -->
+  </div>
 
   <script>
-    // Menú de ejemplo
-    const menu = [
-      { id: 1, name: "Ensalada César", description: "Lechuga, pollo, queso parmesano...", price: 5.99 },
-      { id: 2, name: "Pizza Margarita", description: "Tomate, mozzarella, albahaca...", price: 8.99 },
-      { id: 3, name: "Hamburguesa Clásica", description: "Carne, queso, lechuga, tomate...", price: 9.99 },
-      { id: 4, name: "Sopa de Tomate", description: "Sopa de tomate fresca, con pan tostado.", price: 4.99 },
-    ];
+    // Función que se llama al hacer click en "Generar QR"
+    document.getElementById("generateQR").onclick = function() {
+      // Creamos un array para almacenar los platos seleccionados y sus cantidades
+      var comanda = [];
 
-    const menuItemsContainer = document.getElementById('menu-items');
-
-    // Mostrar los platos en la página
-    menu.forEach(plate => {
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <input type="checkbox" id="plate-${plate.id}" data-id="${plate.id}" />
-        <label for="plate-${plate.id}">${plate.name} - ${plate.price}€</label>
-        <input type="number" min="1" value="1" id="quantity-${plate.id}" disabled />
-        <span>${plate.description}</span>
-        <hr />
-      `;
-      menuItemsContainer.appendChild(div);
-
-      // Habilitar/deshabilitar la cantidad dependiendo del estado del checkbox
-      document.getElementById(`plate-${plate.id}`).addEventListener('change', (e) => {
-        const quantityInput = document.getElementById(`quantity-${plate.id}`);
-        quantityInput.disabled = !e.target.checked;
+      // Verificamos los platos seleccionados
+      var platos = document.querySelectorAll(".plato input[type='checkbox']");
+      platos.forEach(function(plato) {
+        // Si el plato está seleccionado
+        if (plato.checked) {
+          var nombrePlato = plato.getAttribute("data-nombre");
+          var cantidadPlato = document.getElementById("cantidad" + plato.id.replace("plato", "")).value;
+          
+          // Agregamos el plato y la cantidad al array de la comanda
+          comanda.push(nombrePlato + " - Cantidad: " + cantidadPlato);
+        }
       });
-    });
 
-    // Obtener la comanda seleccionada
-    const getComanda = () => {
-      const comanda = [];
-      document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-        const plateId = checkbox.getAttribute('data-id');
-        const plate = menu.find(item => item.id == plateId);
-        const quantity = document.getElementById(`quantity-${plateId}`).value || 1;
-        
-        comanda.push({
-          plate: plate.name,
-          quantity: quantity,
-          price: plate.price
-        });
-      });
-      return comanda;
-    };
-
-    // Generar el código QR
-    const generateQRCode = (comanda) => {
-      const qrText = encodeURIComponent(JSON.stringify(comanda));  // Codificar la comanda como JSON
-      const qrContainer = document.getElementById('qr-code');
-      qrContainer.innerHTML = ''; // Limpiar QR previo
-      new QRCode(qrContainer, {
-        text: qrText,
-        width: 128,
-        height: 128
-      });
-    };
-
-    // Evento para generar QR al enviar el formulario
-    document.getElementById('menu-form').addEventListener('submit', (event) => {
-      event.preventDefault();
-      const comanda = getComanda();
+      // Si hay al menos un plato seleccionado, generamos el QR
       if (comanda.length > 0) {
-        generateQRCode(comanda);
+        var comandaTexto = comanda.join("\n");
+        
+        // Creamos la URL del servicio de generación de QR
+        var qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(comandaTexto)}&size=200x200`;
+
+        // Creamos la imagen del QR y la añadimos al contenedor
+        var img = document.createElement("img");
+        img.src = qrUrl;
+        
+        // Limpiamos el contenedor y mostramos el nuevo QR
+        document.getElementById("qrContainer").innerHTML = "";
+        document.getElementById("qrContainer").appendChild(img);
       } else {
-        alert('Por favor, selecciona al menos un plato.');
+        alert("Por favor, selecciona al menos un plato.");
       }
-    });
+    };
   </script>
 
 </body>
