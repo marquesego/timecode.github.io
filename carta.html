@@ -3,123 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carta de Restaurante con Generación de QR</title>
+  <title>Carta de Restaurante con QR y Carrito</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', Arial, sans-serif;
       margin: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+      position: relative;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    #carta {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .categoria {
+      margin-top: 30px;
     }
     .plato {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      padding: 10px 15px;
       margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .plato input[type="number"] {
+      width: 50px;
+      margin-right: 10px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    .plato label {
+      flex: 1;
+      margin-left: 10px;
+      font-size: 1.1em;
+    }
+    .precio {
+      font-weight: bold;
+      color: #27ae60;
+      margin-left: 10px;
+    }
+    .plato input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+    #generateQR {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      font-size: 1em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #generateQR:hover {
+      background: #2980b9;
     }
     #qrContainer {
+      text-align: center;
       margin-top: 20px;
+    }
+    #qrContainer img {
+      margin-top: 20px;
+      border: 5px solid #3498db;
+      border-radius: 10px;
+      background: white;
+      padding: 10px;
+    }
+    #carrito {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    #carrito h2 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #listaCarrito {
+      margin-bottom: 10px;
+    }
+    #totalCarrito {
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.2em;
+      color: #e67e22;
     }
   </style>
 </head>
 <body>
 
-  <h1>Carta del Restaurante</h1>
+  <h1>🍽️ Carta del Restaurante</h1>
 
-  <!-- Lista de platos -->
   <div id="carta">
-    <div class="plato">
-      <input type="checkbox" id="plato1" data-nombre="Ensalada César">
-      <label for="plato1">Ensalada César</label>
-      <input type="number" id="cantidad1" min="1" value="1" style="width: 50px;">
+
+    <!-- Sección de Platos -->
+    <div class="categoria">
+      <h2>Platos</h2>
+      <div class="plato">
+        <input type="number" id="cantidad1" min="1" value="1">
+        <input type="checkbox" id="plato1" data-nombre="Ensalada César" data-precio="8.50">
+        <label for="plato1">Ensalada César</label>
+        <span class="precio">8.50€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad2" min="1" value="1">
+        <input type="checkbox" id="plato2" data-nombre="Pizza Margarita" data-precio="10.00">
+        <label for="plato2">Pizza Margarita</label>
+        <span class="precio">10.00€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad3" min="1" value="1">
+        <input type="checkbox" id="plato3" data-nombre="Pasta Bolognesa" data-precio="11.00">
+        <label for="plato3">Pasta Bolognesa</label>
+        <span class="precio">11.00€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad4" min="1" value="1">
+        <input type="checkbox" id="plato4" data-nombre="Lasaña de Carne" data-precio="12.00">
+        <label for="plato4">Lasaña de Carne</label>
+        <span class="precio">12.00€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad5" min="1" value="1">
+        <input type="checkbox" id="plato5" data-nombre="Sopa de Marisco" data-precio="9.50">
+        <label for="plato5">Sopa de Marisco</label>
+        <span class="precio">9.50€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad6" min="1" value="1">
+        <input type="checkbox" id="plato6" data-nombre="Paella Valenciana" data-precio="14.00">
+        <label for="plato6">Paella Valenciana</label>
+        <span class="precio">14.00€</span>
+      </div>
     </div>
-    <div class="plato">
-      <input type="checkbox" id="plato2" data-nombre="Pizza Margarita">
-      <label for="plato2">Pizza Margarita</label>
-      <input type="number" id="cantidad2" min="1" value="1" style="width: 50px;">
+
+    <!-- Sección de Bebidas -->
+    <div class="categoria">
+      <h2>Bebidas</h2>
+      <div class="plato">
+        <input type="number" id="cantidad7" min="1" value="1">
+        <input type="checkbox" id="plato7" data-nombre="Agua Mineral" data-precio="2.00">
+        <label for="plato7">Agua Mineral</label>
+        <span class="precio">2.00€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad8" min="1" value="1">
+        <input type="checkbox" id="plato8" data-nombre="Refresco" data-precio="2.50">
+        <label for="plato8">Refresco</label>
+        <span class="precio">2.50€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad9" min="1" value="1">
+        <input type="checkbox" id="plato9" data-nombre="Cerveza" data-precio="3.00">
+        <label for="plato9">Cerveza</label>
+        <span class="precio">3.00€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad10" min="1" value="1">
+        <input type="checkbox" id="plato10" data-nombre="Vino Tinto" data-precio="4.00">
+        <label for="plato10">Vino Tinto</label>
+        <span class="precio">4.00€</span>
+      </div>
+      <div class="plato">
+        <input type="number" id="cantidad11" min="1" value="1">
+        <input type="checkbox" id="plato11" data-nombre="Café" data-precio="1.80">
+        <label for="plato11">Café</label>
+        <span class="precio">1.80€</span>
+      </div>
     </div>
-    <div class="plato">
-      <input type="checkbox" id="plato3" data-nombre="Pasta Bolognesa">
-      <label for="plato3">Pasta Bolognesa</label>
-      <input type="number" id="cantidad3" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato4" data-nombre="Lasaña de Carne">
-      <label for="plato4">Lasaña de Carne</label>
-      <input type="number" id="cantidad4" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato5" data-nombre="Sopa de Marisco">
-      <label for="plato5">Sopa de Marisco</label>
-      <input type="number" id="cantidad5" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato6" data-nombre="Paella Valenciana">
-      <label for="plato6">Paella Valenciana</label>
-      <input type="number" id="cantidad6" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato7" data-nombre="Tacos de Carne">
-      <label for="plato7">Tacos de Carne</label>
-      <input type="number" id="cantidad7" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato8" data-nombre="Hamburguesa Gourmet">
-      <label for="plato8">Hamburguesa Gourmet</label>
-      <input type="number" id="cantidad8" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato9" data-nombre="Filete a la Parrilla">
-      <label for="plato9">Filete a la Parrilla</label>
-      <input type="number" id="cantidad9" min="1" value="1" style="width: 50px;">
-    </div>
-    <div class="plato">
-      <input type="checkbox" id="plato10" data-nombre="Ceviche">
-      <label for="plato10">Ceviche</label>
-      <input type="number" id="cantidad10" min="1" value="1" style="width: 50px;">
-    </div>
+
   </div>
 
-  <!-- Botón para generar QR -->
+  <!-- Botón -->
   <button id="generateQR">Generar Comanda en QR</button>
 
-  <!-- Área donde se muestra el QR -->
-  <div id="qrContainer">
-    <!-- El QR aparecerá aquí -->
+  <!-- Contenedor del QR -->
+  <div id="qrContainer"></div>
+
+  <!-- Carrito flotante -->
+  <div id="carrito">
+    <h2>🛒 Tu Pedido</h2>
+    <div id="listaCarrito"></div>
+    <div id="totalCarrito">Total: 0.00€</div>
   </div>
 
+  <!-- Script -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <script>
-    // Función que se llama al hacer click en "Generar QR"
-    document.getElementById("generateQR").onclick = function() {
-      // Creamos un array para almacenar los platos seleccionados y sus cantidades
-      var comanda = [];
+    function actualizarCarrito() {
+      var lista = document.getElementById("listaCarrito");
+      var total = 0;
+      lista.innerHTML = "";
 
-      // Verificamos los platos seleccionados
       var platos = document.querySelectorAll(".plato input[type='checkbox']");
       platos.forEach(function(plato) {
-        // Si el plato está seleccionado
         if (plato.checked) {
-          var nombrePlato = plato.getAttribute("data-nombre");
-          var cantidadPlato = document.getElementById("cantidad" + plato.id.replace("plato", "")).value;
-          
-          // Agregamos el plato y la cantidad al array de la comanda
-          comanda.push(nombrePlato + " - Cantidad: " + cantidadPlato);
+          var nombre = plato.getAttribute("data-nombre");
+          var precio = parseFloat(plato.getAttribute("data-precio"));
+          var cantidad = parseInt(document.getElementById("cantidad" + plato.id.replace('plato', '')).value);
+          var subtotal = precio * cantidad;
+
+          var item = document.createElement("div");
+          item.innerText = nombre + " x" + cantidad + " - " + subtotal.toFixed(2) + "€";
+          lista.appendChild(item);
+
+          total += subtotal;
         }
       });
 
-      // Si hay al menos un plato seleccionado, generamos el QR
-      if (comanda.length > 0) {
-        var comandaTexto = comanda.join("\n");
-        
-        // Creamos la URL del servicio de generación de QR
-        var qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(comandaTexto)}&size=200x200`;
+      document.getElementById("totalCarrito").innerText = "Total: " + total.toFixed(2) + "€";
+    }
 
-        // Creamos la imagen del QR y la añadimos al contenedor
-        var img = document.createElement("img");
-        img.src = qrUrl;
-        
-        // Limpiamos el contenedor y mostramos el nuevo QR
-        document.getElementById("qrContainer").innerHTML = "";
-        document.getElementById("qrContainer").appendChild(img);
+    document.getElementById("generateQR").addEventListener("click", function() {
+      var pedido = "";
+      var platos = document.querySelectorAll(".plato input[type='checkbox']");
+      platos.forEach(function(plato) {
+        if (plato.checked) {
+          var nombre = plato.getAttribute("data-nombre");
+          var cantidad = document.getElementById("cantidad" + plato.id.replace('plato', '')).value;
+          pedido += nombre + " x" + cantidad + "\n";
+        }
+      });
+
+      if (pedido) {
+        // Generar código QR
+        QRCode.toDataURL(pedido, function (err, url) {
+          var img = document.createElement("img");
+          img.src = url;
+          var qrContainer = document.getElementById("qrContainer");
+          qrContainer.innerHTML = "";
+          qrContainer.appendChild(img);
+        });
       } else {
-        alert("Por favor, selecciona al menos un plato.");
+        alert("Por favor selecciona algo para generar el QR.");
       }
-    };
+    });
+
+    // Actualización del carrito al cambiar la cantidad o seleccionar un plato
+    document.querySelectorAll("input[type='checkbox'], input[type='number']").forEach(function(elemento) {
+      elemento.addEventListener("change", actualizarCarrito);
+    });
+
+    // Inicializar carrito
+    actualizarCarrito();
   </script>
 
 </body>
