@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pad Audio Launcher</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f8f8f8;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pad-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .pad {
+      background: white;
+      padding: 1rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      transition: background 0.3s ease;
+    }
+    .pad label {
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+    .pad input[type="text"],
+    .pad input[type="file"],
+    .pad input[type="color"],
+    .pad input[type="range"],
+    .pad select {
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+    }
+    .pad input[type="text"],
+    .pad input[type="range"],
+    .pad select {
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+    }
+    .pad input[type="color"] {
+      height: 2rem;
+      border: none;
+      cursor: pointer;
+    }
+    .controls, .template-controls {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .switch {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      margin: 0 5px;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="template-controls">
+    <label for="templateSelect">Plantilla:</label>
+    <select id="templateSelect"></select>
+    <button onclick="saveTemplate()">Guardar</button>
+    <button onclick="loadTemplate()">Cargar</button>
+    <button onclick="exportTemplate()">Exportar</button>
+    <input type="file" id="importInput" style="display:none" accept="application/json" />
+    <button onclick="document.getElementById('importInput').click()">Importar</button>
+  </div>
+  <div class="pad-grid" id="padGrid"></div>
+
+  <script>
+    const pastelColors = [
+      "#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF",
+      "#E3BAFF", "#FFC0CB", "#ADD8E6", "#D8BFD8", "#F0E68C",
+      "#98FB98", "#AFEEEE"
+    ];
+
+    const NUM_PADS = 9;
+    const padGrid = document.getElementById("padGrid");
+    const templateSelect = document.getElementById("templateSelect");
+    const importInput = document.getElementById("importInput");
+
+    const pads = [];
+
+    for (let i = 0; i < NUM_PADS; i++) {
+      const pad = document.createElement("div");
+      pad.className = "pad";
+      pad.style.background = pastelColors[i % pastelColors.length];
+      pad.innerHTML = `
+        <label>Nombre:</label>
+        <input type="text" id="name${i}" />
+
+        <label>Audio:</label>
+        <input type="file" accept="audio/*" id="file${i}" />
+
+        <label>Tecla:</label>
+        <input type="text" maxlength="1" id="key${i}" />
+
+        <label>Color:</label>
+        <input type="color" id="color${i}" value="${pastelColors[i % pastelColors.length]}" />
+
+        <label>Volumen:</label>
+        <input type="range" id="volume${i}" min="0" max="1" step="0.01" value="1" />
+
+        <div class="switch">
+          <label>Modo Hold</label>
+          <input type="checkbox" id="hold${i}" />
+        </div>
+      `;
+      padGrid.appendChild(pad);
+
+      const p = {
+        pad,
+        nameInput: pad.querySelector(`#name${i}`),
+        fileInput: pad.querySelector(`#file${i}`),
+        keyInput: pad.querySelector(`#key${i}`),
+        colorInput: pad.querySelector(`#color${i}`),
+        volumeInput: pad.querySelector(`#volume${i}`),
+        holdInput: pad.querySelector(`#hold${i}`),
+        audio: null,
+        playing: false
+      };
+
+      p.fileInput.addEventListener("change", e => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            p.audio = new Audio(reader.result);
+            p.audio.volume = p.volumeInput.value;
+            p.fileInput.dataset.file = reader.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      p.volumeInput.addEventListener("input", () => {
+        if (p.audio) p.audio.volume = p.volumeInput.value;
+      });
+
+      p.colorInput.addEventListener("input", () => {
+        p.pad.style.background = p.colorInput.value;
+      });
+
+      p.pad.addEventListener("touchstart", () => triggerPad(p));
+      p.pad.addEventListener("touchend", () => releasePad(p));
+
+      pads.push(p);
+    }
+
+    function triggerPad(p) {
+      if (p.audio) {
+        if (p.holdInput.checked) {
+          p.audio.play();
+        } else {
+          p.audio.currentTime = 0;
+          p.audio.play();
+        }
+      }
+    }
+
+    function releasePad(p) {
+      if (p.holdInput.checked && p.audio) {
+        p.audio.pause();
+        p.audio.currentTime = 0;
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      pads.forEach(p => {
+        if (p.keyInput.value.toLowerCase() === e.key.toLowerCase() ||
+            (p.keyInput.value === "←" && e.key === "ArrowLeft") ||
+            (p.keyInput.value === "↑" && e.key === "ArrowUp") ||
+            (p.keyInput.value === "→" && e.key === "ArrowRight") ||
+            (p.keyInput.value === "↓" && e.key === "ArrowDown")) {
+          triggerPad(p);
+        }
+      });
+    });
+
+    document.addEventListener("keyup", e => {
+      pads.forEach(p => {
+        if (p.holdInput.checked &&
+          (p.keyInput.value.toLowerCase() === e.key.toLowerCase() ||
+            (p.keyInput.value === "←" && e.key === "ArrowLeft") ||
+            (p.keyInput.value === "↑" && e.key === "ArrowUp") ||
+            (p.keyInput.value === "→" && e.key === "ArrowRight") ||
+            (p.keyInput.value === "↓" && e.key === "ArrowDown"))) {
+          releasePad(p);
+        }
+      });
+    });
+
+    function saveTemplate() {
+      const name = prompt("Nombre de la plantilla:");
+      if (!name) return;
+      const data = pads.map(p => ({
+        name: p.nameInput.value,
+        key: p.keyInput.value,
+        color: p.colorInput.value,
+        hold: p.holdInput.checked,
+        volume: p.volumeInput.value,
+        file: p.fileInput.dataset.file || null
+      }));
+      localStorage.setItem("template_" + name, JSON.stringify(data));
+      updateTemplateSelect();
+    }
+
+    function loadTemplate() {
+      const name = templateSelect.value;
+      if (!name) return;
+      const data = JSON.parse(localStorage.getItem("template_" + name));
+      data.forEach((d, i) => {
+        const p = pads[i];
+        p.nameInput.value = d.name;
+        p.keyInput.value = d.key;
+        p.colorInput.value = d.color;
+        p.holdInput.checked = d.hold;
+        p.volumeInput.value = d.volume;
+        p.pad.style.background = d.color;
+        if (d.file) {
+          p.audio = new Audio(d.file);
+          p.audio.volume = p.volumeInput.value;
+          p.fileInput.dataset.file = d.file;
+        }
+      });
+    }
+
+    function updateTemplateSelect() {
+      templateSelect.innerHTML = "";
+      Object.keys(localStorage)
+        .filter(k => k.startsWith("template_"))
+        .forEach(k => {
+          const opt = document.createElement("option");
+          opt.value = k.replace("template_", "");
+          opt.textContent = k.replace("template_", "");
+          templateSelect.appendChild(opt);
+        });
+    }
+
+    function exportTemplate() {
+      const name = templateSelect.value || "plantilla";
+      const data = pads.map(p => ({
+        name: p.nameInput.value,
+        key: p.keyInput.value,
+        color: p.colorInput.value,
+        hold: p.holdInput.checked,
+        volume: p.volumeInput.value,
+        file: p.fileInput.dataset.file || null
+      }));
+      const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name + ".json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    importInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const data = JSON.parse(reader.result);
+        data.forEach((d, i) => {
+          const p = pads[i];
+          p.nameInput.value = d.name;
+          p.keyInput.value = d.key;
+          p.colorInput.value = d.color;
+          p.holdInput.checked = d.hold;
+          p.volumeInput.value = d.volume;
+          p.pad.style.background = d.color;
+          if (d.file) {
+            p.audio = new Audio(d.file);
+            p.audio.volume = p.volumeInput.value;
+            p.fileInput.dataset.file = d.file;
+          }
+        });
+      };
+      reader.readAsText(file);
+    });
+
+    updateTemplateSelect();
+  </script>
+</body>
+</html>
