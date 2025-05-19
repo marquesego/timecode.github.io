@@ -2,60 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Texto a Sonidos FX</title>
+  <title>Sonido FX (funciona)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 80px;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-  </style>
 </head>
 <body>
-  <h2>Convierte texto en efectos de sonido 🎧</h2>
-  <textarea id="textInput" placeholder="Ejemplo: explosión, pasos, lluvia..."></textarea><br>
-  <button onclick="playFX()">🔊 Reproducir</button>
+  <h1>🔊 Prueba de sonido desde GitHub Pages</h1>
+  <button onclick="playSound()">Reproducir explosión</button>
 
   <script>
-    const soundMap = {
-      'explosión': new Howl({
-        src: ['https://cdn.jsdelivr.net/gh/joshwcomeau/assets@master/sounds/explosion.wav'],
-        volume: 1
-      }),
-      'pasos': new Howl({
-        src: ['https://cdn.jsdelivr.net/gh/joshwcomeau/assets@master/sounds/footstep.wav'],
-        volume: 1
-      }),
-      'lluvia': new Howl({
-        src: ['https://cdn.jsdelivr.net/gh/joshwcomeau/assets@master/sounds/rain.mp3'],
-        volume: 1
-      })
-    };
+    const explosion = new Howl({
+      src: ['https://cdn.pixabay.com/download/audio/2022/03/15/audio_cdd7f71c64.mp3?filename=explosion-6055.mp3'],
+      volume: 1
+    });
 
-    function playFX() {
-      const input = document.getElementById('textInput').value.toLowerCase();
-      let found = false;
-
-      Object.keys(soundMap).forEach(word => {
-        if (input.includes(word)) {
-          soundMap[word].play();
-          found = true;
-        }
-      });
-
-      if (!found) {
-        alert('No se encontraron sonidos relacionados con el texto.');
-      }
+    function playSound() {
+      explosion.play();
     }
   </script>
 </body>
