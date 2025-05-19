@@ -2,21 +2,35 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Sonido FX (funciona)</title>
+  <title>Texto a Sonidos FX</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
-  <h1>🔊 Prueba de sonido desde GitHub Pages</h1>
-  <button onclick="playSound()">Reproducir explosión</button>
+  <h1>🔊 Reproduce sonidos desde texto</h1>
+  <textarea id="textInput" rows="4" cols="50" placeholder="Ejemplo: explosión, pasos, lluvia..."></textarea><br>
+  <button onclick="playFX()">Reproducir sonidos</button>
 
   <script>
-    const explosion = new Howl({
-      src: ['https://cdn.pixabay.com/download/audio/2022/03/15/audio_cdd7f71c64.mp3?filename=explosion-6055.mp3'],
-      volume: 1
-    });
+    const soundMap = {
+      'explosión': new Howl({ src: ['sonidos/explosion.mp3'] }),
+      'pasos':     new Howl({ src: ['sonidos/pasos.mp3'] }),
+      'lluvia':    new Howl({ src: ['sonidos/lluvia.mp3'] })
+    };
 
-    function playSound() {
-      explosion.play();
+    function playFX() {
+      const input = document.getElementById('textInput').value.toLowerCase();
+      let found = false;
+
+      Object.keys(soundMap).forEach(word => {
+        if (input.includes(word)) {
+          soundMap[word].play();
+          found = true;
+        }
+      });
+
+      if (!found) {
+        alert('No se encontraron sonidos relacionados.');
+      }
     }
   </script>
 </body>
