@@ -1,36 +1,175 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Texto a Sonidos FX</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>Mezcla efectos y exporta WAV</title>
 </head>
 <body>
-  <h1>🔊 Reproduce sonidos desde texto</h1>
-  <textarea id="textInput" rows="4" cols="50" placeholder="Ejemplo: explosión, pasos, lluvia..."></textarea><br>
-  <button onclick="playFX()">Reproducir sonidos</button>
+  <h1>🎧 Exportar efectos mezclados en WAV</h1>
+  <textarea id="textInput" rows="8" cols="60" placeholder="Escribe la narración con efectos en MAYÚSCULAS"></textarea><br>
+  <button onclick="mixAndExport()">Generar WAV con efectos</button>
 
   <script>
-    const soundMap = {
-      'explosión': new Howl({ src: ['sonidos/explosion.mp3'] }),
-      'pasos':     new Howl({ src: ['sonidos/pasos.mp3'] }),
-      'lluvia':    new Howl({ src: ['sonidos/lluvia.mp3'] })
+    const soundsSrc = {
+      'EXPLOSIÓN': 'sonidos/explosion.mp3',
+      'PASOS': 'sonidos/pasos.mp3',
+      'LLUVIA': 'sonidos/lluvia.mp3'
     };
 
-    function playFX() {
-      const input = document.getElementById('textInput').value.toLowerCase();
-      let found = false;
+    async function loadAudioBuffer(context, url) {
+      console.log(`Cargando: ${url}`);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`No se pudo cargar: ${url}`);
+      const arrayBuffer = await response.arrayBuffer();
+      return await context.decodeAudioData(arrayBuffer);
+    }
 
-      Object.keys(soundMap).forEach(word => {
-        if (input.includes(word)) {
-          soundMap[word].play();
-          found = true;
+    async function mixAndExport() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) {
+        alert("Por favor escribe una narración con efectos en mayúsculas.");
+        return;
+      }
+
+      const context = new OfflineAudioContext(1, 44100 * 60, 44100);
+
+      // Regex para efectos mayúsculas exactas
+      const regex = new RegExp(`\\b(${Object.keys(soundsSrc).join('|')})\\b`, 'g');
+
+      let parts = [];
+      let lastIndex = 0;
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          parts.push({ type: 'text', content: text.substring(lastIndex, match.index).trim() });
         }
+        parts.push({ type: 'sound', content: match[0] });
+        lastIndex = regex.lastIndex;
+      }
+      if (lastIndex < text.length) {
+        parts.push({ type: 'text', content: text.substring(lastIndex).trim() });
+      }
+
+      function fragmentDuration(textFragment) {
+        if (!textFragment) return 0;
+        const words = textFragment.split(/\s+/).filter(w => w.length > 0);
+        return words.length / 2.5;
+      }
+
+      // Cargar buffers
+      let buffers = {};
+      try {
+        for (const key of Object.keys(soundsSrc)) {
+          buffers[key] = await loadAudioBuffer(context, soundsSrc[key]);
+        }
+      } catch (e) {
+        alert("Error cargando sonidos: " + e.message);
+        console.error(e);
+        return;
+      }
+
+      // Calcular tiempos de los efectos
+      let currentTime = 0;
+      let schedule = [];
+      for (const part of parts) {
+        if (part.type === 'text') {
+          currentTime += fragmentDuration(part.content);
+        } else if (part.type === 'sound') {
+          schedule.push({ sound: part.content, time: currentTime });
+        }
+      }
+
+      // Añadir sonidos al contexto
+      schedule.forEach(item => {
+        const src = context.createBufferSource();
+        src.buffer = buffers[item.sound];
+        src.connect(context.destination);
+        src.start(item.time);
+        console.log(`Programado sonido ${item.sound} en ${item.time.toFixed(2)}s`);
       });
 
-      if (!found) {
-        alert('No se encontraron sonidos relacionados.');
+      // Renderizar mezcla
+      let renderedBuffer;
+      try {
+        renderedBuffer = await context.startRendering();
+      } catch (e) {
+        alert("Error al renderizar el audio: " + e.message);
+        console.error(e);
+        return;
       }
+
+      // Convertir a WAV
+      function audioBufferToWav(buffer) {
+        const numOfChan = buffer.numberOfChannels,
+          length = buffer.length * numOfChan * 2 + 44,
+          bufferArray = new ArrayBuffer(length),
+          view = new DataView(bufferArray),
+          channels = [],
+          sampleRate = buffer.sampleRate,
+          bitsPerSample = 16;
+        let offset = 0;
+
+        function writeString(str) {
+          for (let i = 0; i < str.length; i++) {
+            view.setUint8(offset++, str.charCodeAt(i));
+          }
+        }
+
+        function write16(value) {
+          view.setUint16(offset, value, true);
+          offset += 2;
+        }
+
+        function write32(value) {
+          view.setUint32(offset, value, true);
+          offset += 4;
+        }
+
+        writeString('RIFF');
+        write32(length - 8);
+        writeString('WAVE');
+        writeString('fmt ');
+        write32(16);
+        write16(1);
+        write16(numOfChan);
+        write32(sampleRate);
+        write32(sampleRate * numOfChan * bitsPerSample / 8);
+        write16(numOfChan * bitsPerSample / 8);
+        write16(bitsPerSample);
+        writeString('data');
+        write32(length - offset - 4);
+
+        for (let i = 0; i < buffer.length; i++) {
+          for (let channel = 0; channel < numOfChan; channel++) {
+            let sample = buffer.getChannelData(channel)[i];
+            sample = Math.max(-1, Math.min(1, sample));
+            sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+            view.setInt16(offset, sample, true);
+            offset += 2;
+          }
+        }
+
+        return new Blob([bufferArray], { type: 'audio/wav' });
+      }
+
+      const wavBlob = audioBufferToWav(renderedBuffer);
+      const url = URL.createObjectURL(wavBlob);
+
+      // Crear enlace para descarga
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'efectos_mezclados.wav';
+      document.body.appendChild(a);
+      a.click();
+
+      // Limpiar URL y enlace
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        a.remove();
+      }, 100);
+
+      console.log('Archivo WAV generado y descarga iniciada.');
     }
   </script>
 </body>
