@@ -2,209 +2,270 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Editor Podcast Crimen con Efectos y Narración</title>
+  <title>Podcast FX Editor Pro</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
       display: flex;
-      gap: 20px;
-      height: 90vh;
+      height: 100vh;
+      margin: 0;
     }
-    #editor {
-      width: 65%;
-      height: 100%;
-      font-size: 1.1em;
-      padding: 10px;
-      border: 1px solid #ccc;
-      resize: vertical;
-      white-space: pre-wrap;
-      font-family: monospace;
-      overflow-y: auto;
-    }
-    #effectsList {
-      width: 30%;
+    #editor-section {
+      flex: 3;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      height: 100%;
     }
-    #effectsList h3 {
-      margin-bottom: 10px;
-    }
-    #effectsList button {
+    #textInput {
+      flex-grow: 1;
+      font-size: 1.1em;
       padding: 10px;
-      font-weight: bold;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #buttons {
+      margin-top: 10px;
+    }
+    button {
+      margin-right: 8px;
+      padding: 10px 16px;
+      font-size: 1em;
       cursor: pointer;
-      background-color: #007bff;
+      border-radius: 5px;
+      border: none;
+      background: #0069d9;
+      color: white;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0053b3;
+    }
+    #effects-list {
+      flex: 1;
+      border-left: 1px solid #ccc;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    #effects-list h2 {
+      margin-top: 0;
+    }
+    .effect-btn {
+      display: block;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background: #28a745;
       color: white;
       border: none;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
+      border-radius: 4px;
+      cursor: pointer;
       text-align: left;
+      font-weight: bold;
+      user-select: none;
+      transition: background 0.2s;
     }
-    #effectsList button:hover {
-      background-color: #0056b3;
-    }
-    #controls {
-      margin-top: 20px;
-      display: flex;
-      gap: 15px;
-      justify-content: center;
+    .effect-btn:hover {
+      background: #1e7e34;
     }
     #status {
-      margin-top: 10px;
-      text-align: center;
+      margin-top: 8px;
       font-style: italic;
       color: #555;
+      min-height: 20px;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
 
-  <textarea id="editor" placeholder="Escribe la historia aquí..."></textarea>
-
-  <div id="effectsList">
-    <h3>Insertar efectos</h3>
-    <button onclick="insertEffect('DISPARO')">DISPARO 🔫</button>
-    <button onclick="insertEffect('SUSURROS')">SUSURROS 🤫</button>
-    <button onclick="insertEffect('PUERTA-CRUJIDO')">PUERTA CRUJIDO 🚪</button>
-    <button onclick="insertEffect('PASOS')">PASOS 👣</button>
-    <button onclick="insertEffect('LLUVIA')">LLUVIA 🌧️</button>
-    <button onclick="insertEffect('TELÉFONO')">TELÉFONO 📞</button>
-    <button onclick="insertEffect('ALARMA')">ALARMA 🚨</button>
-    <button onclick="insertEffect('VENTILADOR')">VENTILADOR 🌀</button>
-    <button onclick="insertEffect('GRITOS')">GRITOS 😱</button>
-    <button onclick="insertEffect('TIEMPO-SILENCIO')">TIEMPO SILENCIO 🕰️</button>
-    <button onclick="insertEffect('CORRER')">CORRER 🏃‍♂️</button>
-    <button onclick="insertEffect('CERRADURA')">CERRADURA 🔐</button>
-    <button onclick="insertEffect('POLICÍA')">POLICÍA 🚓</button>
-
-    <div id="controls">
-      <button onclick="playNarration()">▶️ Reproducir narración + efectos</button>
-      <button onclick="stopNarration()">⏹️ Parar</button>
+  <section id="editor-section">
+    <h1>🎙️ Podcast FX Editor Pro</h1>
+    <textarea id="textInput" placeholder="Escribe aquí tu texto con efectos en MAYÚSCULAS (e.g. DISPARO, PASOS)..."></textarea>
+    <div id="buttons">
+      <button id="playBtn">▶️ Reproducir narración + efectos</button>
+      <button id="stopBtn" disabled>⏹ Parar todo</button>
+      <button id="saveTextBtn">💾 Guardar texto</button>
+      <button id="loadTextBtn">📂 Cargar texto</button>
+      <button id="exportWavBtn">⬇️ Exportar efectos WAV (simulado)</button>
     </div>
     <div id="status"></div>
-  </div>
+  </section>
 
-  <script>
-    // Mapear efectos a sonidos (pon tus archivos en carpeta sonidos)
-    const soundMap = {
-      'DISPARO':       new Howl({ src: ['sonidos/disparo.mp3'] }),
-      'SUSURROS':      new Howl({ src: ['sonidos/susurros.mp3'] }),
-      'PUERTA-CRUJIDO':new Howl({ src: ['sonidos/puerta-crujido.mp3'] }),
-      'PASOS':         new Howl({ src: ['sonidos/pasos.mp3'] }),
-      'LLUVIA':        new Howl({ src: ['sonidos/lluvia.mp3'] }),
-      'TELÉFONO':      new Howl({ src: ['sonidos/telefono.mp3'] }),
-      'ALARMA':        new Howl({ src: ['sonidos/alarma.mp3'] }),
-      'VENTILADOR':    new Howl({ src: ['sonidos/ventilador.mp3'] }),
-      'GRITOS':        new Howl({ src: ['sonidos/gritos.mp3'] }),
-      'TIEMPO-SILENCIO': new Howl({ src: ['sonidos/tiempo-silencio.mp3'] }),
-      'CORRER':        new Howl({ src: ['sonidos/correr.mp3'] }),
-      'CERRADURA':     new Howl({ src: ['sonidos/cerradura.mp3'] }),
-      'POLICÍA':       new Howl({ src: ['sonidos/policia.mp3'] })
+  <aside id="effects-list">
+    <h2>Efectos de sonido</h2>
+    <button class="effect-btn" data-effect="DISPARO">DISPARO</button>
+    <button class="effect-btn" data-effect="PASOS">PASOS</button>
+    <button class="effect-btn" data-effect="PUERTA_CHIRRIANTE">PUERTA_CHIRRIANTE</button>
+    <button class="effect-btn" data-effect="LLUVIA">LLUVIA</button>
+    <button class="effect-btn" data-effect="SIRENA">SIRENA</button>
+    <button class="effect-btn" data-effect="RELOJ">RELOJ</button>
+    <button class="effect-btn" data-effect="TELEFONO">TELEFONO</button>
+    <button class="effect-btn" data-effect="GRITOS">GRITOS</button>
+    <button class="effect-btn" data-effect="VIENTO">VIENTO</button>
+    <button class="effect-btn" data-effect="SUSURROS">SUSURROS</button>
+    <button class="effect-btn" data-effect="CRISTALES_ROMPIENDO">CRISTALES_ROMPIENDO</button>
+    <button class="effect-btn" data-effect="LADRIDOS">LADRIDOS</button>
+    <button class="effect-btn" data-effect="MOTOR">MOTOR</button>
+    <button class="effect-btn" data-effect="TECLADO">TECLADO</button>
+    <button class="effect-btn" data-effect="AMBIENTE_OSCURO">AMBIENTE_OSCURO</button>
+  </aside>
+
+<script>
+  // Mapa de sonidos con Howler.js, rutas relativas a la carpeta "sonidos"
+  const soundMap = {
+    'DISPARO': new Howl({ src: ['sonidos/disparo.mp3'] }),
+    'PASOS': new Howl({ src: ['sonidos/pasos.mp3'] }),
+    'PUERTA_CHIRRIANTE': new Howl({ src: ['sonidos/puerta_chirriante.mp3'] }),
+    'LLUVIA': new Howl({ src: ['sonidos/lluvia.mp3'] }),
+    'SIRENA': new Howl({ src: ['sonidos/sirena.mp3'] }),
+    'RELOJ': new Howl({ src: ['sonidos/reloj.mp3'] }),
+    'TELEFONO': new Howl({ src: ['sonidos/telefono.mp3'] }),
+    'GRITOS': new Howl({ src: ['sonidos/gritos.mp3'] }),
+    'VIENTO': new Howl({ src: ['sonidos/viento.mp3'] }),
+    'SUSURROS': new Howl({ src: ['sonidos/susurros.mp3'] }),
+    'CRISTALES_ROMPIENDO': new Howl({ src: ['sonidos/cristales_rompiendo.mp3'] }),
+    'LADRIDOS': new Howl({ src: ['sonidos/ladridos.mp3'] }),
+    'MOTOR': new Howl({ src: ['sonidos/motor.mp3'] }),
+    'TECLADO': new Howl({ src: ['sonidos/teclado.mp3'] }),
+    'AMBIENTE_OSCURO': new Howl({ src: ['sonidos/ambiente_oscuro.mp3'] })
+  };
+
+  const textInput = document.getElementById('textInput');
+  const playBtn = document.getElementById('playBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const saveTextBtn = document.getElementById('saveTextBtn');
+  const loadTextBtn = document.getElementById('loadTextBtn');
+  const exportWavBtn = document.getElementById('exportWavBtn');
+  const status = document.getElementById('status');
+
+  let utterance = null;
+  let scheduledSounds = [];
+  let playing = false;
+
+  // Insertar efecto en mayúsculas en la posición actual del textarea
+  document.querySelectorAll('.effect-btn').forEach(btn => {
+    btn.onclick = () => {
+      const effect = btn.getAttribute('data-effect');
+      insertEffectAtCursor(effect);
+    };
+  });
+
+  function insertEffectAtCursor(effect) {
+    const start = textInput.selectionStart;
+    const end = textInput.selectionEnd;
+    const text = textInput.value;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    const newText = before + ' ' + effect + ' ' + after;
+    textInput.value = newText;
+    textInput.focus();
+    // Colocar cursor después del efecto insertado
+    const pos = start + effect.length + 2;
+    textInput.selectionStart = pos;
+    textInput.selectionEnd = pos;
+  }
+
+  // Guardar texto en localStorage
+  saveTextBtn.onclick = () => {
+    localStorage.setItem('podcastFX_text', textInput.value);
+    status.textContent = '✔️ Texto guardado localmente.';
+    setTimeout(() => status.textContent = '', 3000);
+  };
+
+  // Cargar texto de localStorage
+  loadTextBtn.onclick = () => {
+    const saved = localStorage.getItem('podcastFX_text');
+    if(saved){
+      textInput.value = saved;
+      status.textContent = '✔️ Texto cargado.';
+    } else {
+      status.textContent = 'ℹ️ No hay texto guardado.';
+    }
+    setTimeout(() => status.textContent = '', 3000);
+  };
+
+  // Función para detener toda la reproducción
+  function stopAll() {
+    if(utterance) {
+      speechSynthesis.cancel();
+      utterance = null;
+    }
+    scheduledSounds.forEach(timeoutId => clearTimeout(timeoutId));
+    scheduledSounds = [];
+    Object.values(soundMap).forEach(howl => howl.stop());
+    playing = false;
+    stopBtn.disabled = true;
+    playBtn.disabled = false;
+    status.textContent = '⏹ Reproducción parada.';
+  }
+
+  stopBtn.onclick = stopAll;
+
+  // Función para reproducir narración y efectos sincronizados
+  playBtn.onclick = () => {
+    if(playing) return;
+    const text = textInput.value.trim();
+    if(!text){
+      alert('Por favor, escribe algo en el texto.');
+      return;
+    }
+    playing = true;
+    playBtn.disabled = true;
+    stopBtn.disabled = false;
+    status.textContent = '▶️ Reproduciendo...';
+
+    // Preparamos el utterance
+    utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    // Calculo aproximado: duración total para programar efectos (en ms)
+    // Usamos palabras para calcular duración aproximada
+    const words = text.split(/\s+/).filter(w => w.length>0);
+    // Asumimos velocidad media de lectura: 150 palabras/min = 400ms por palabra (aprox)
+    const estimatedDuration = words.length * 400;
+
+    // Buscamos efectos en el texto y horarios
+    // Vamos a simular tiempos de aparición de cada palabra
+    // Para eso, calculamos una lista con tiempos acumulados por palabra
+    let currentTime = 0;
+    const wordDurations = words.map(() => 400);
+    const wordStartTimes = [];
+    wordDurations.reduce((acc, dur, i) => {
+      wordStartTimes[i] = acc;
+      return acc + dur;
+    }, 0);
+
+    scheduledSounds = [];
+
+    words.forEach((word, i) => {
+      // Si la palabra está en la lista de efectos y existe el sonido
+      if(soundMap[word]){
+        // Programamos la reproducción del efecto al tiempo correspondiente
+        const timeoutId = setTimeout(() => {
+          soundMap[word].play();
+          status.textContent = `🔊 Efecto: ${word}`;
+        }, wordStartTimes[i]);
+        scheduledSounds.push(timeoutId);
+      }
+    });
+
+    utterance.onend = () => {
+      stopAll();
+      status.textContent = '✔️ Narración y efectos finalizados.';
+    };
+    utterance.onerror = (e) => {
+      status.textContent = '⚠️ Error en narración: ' + e.error;
+      stopAll();
     };
 
-    // Insertar efecto en el texto
-    function insertEffect(effect) {
-      const editor = document.getElementById('editor');
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const text = editor.value;
-      editor.value = text.slice(0, start) + ' ' + effect + ' ' + text.slice(end);
-      editor.selectionStart = editor.selectionEnd = start + effect.length + 2;
-      editor.focus();
-    }
+    speechSynthesis.speak(utterance);
+  };
 
-    let synth = window.speechSynthesis;
-    let utterance = null;
-    let isPlaying = false;
-    let startTime = 0;
-    let scheduledSounds = [];
-
-    function playNarration() {
-      if (!synth) {
-        alert("Este navegador no soporta síntesis de voz.");
-        return;
-      }
-      if (isPlaying) {
-        stopNarration();
-      }
-
-      const text = document.getElementById('editor').value;
-      if (!text.trim()) {
-        alert("Escribe algún texto para narrar.");
-        return;
-      }
-
-      document.getElementById('status').textContent = "Narrando...";
-      isPlaying = true;
-
-      // Dividir texto en palabras para calcular tiempos aproximados
-      const words = text.split(/\s+/);
-
-      // Suponemos duración media por palabra en ms
-      const avgWordDuration = 350; // 0.35 seg por palabra, ajustable
-
-      // Detectar efectos (mayúsculas completas, guiones y sin tildes)
-      // Buscamos las palabras que coincidan exactamente con los efectos de soundMap
-      let effectPositions = [];
-      let indexChar = 0;
-      words.forEach((word, i) => {
-        let cleanWord = word.toUpperCase().replace(/[.,;:!?]/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        if (soundMap[cleanWord]) {
-          effectPositions.push({
-            effect: cleanWord,
-            // tiempo aproximado en ms desde inicio (palabra índice * avgWordDuration)
-            time: i * avgWordDuration
-          });
-        }
-        // Actualizar indexChar para avanzar (palabra + espacio)
-        indexChar += word.length + 1;
-      });
-
-      // Crear utterance para narrar todo el texto
-      utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES';
-      utterance.rate = 1; // velocidad de voz
-      utterance.pitch = 1;
-
-      // Al iniciar la voz, guardamos la hora y programamos los sonidos
-      utterance.onstart = () => {
-        startTime = performance.now();
-        // Programar cada efecto con setTimeout según el tiempo estimado
-        scheduledSounds = effectPositions.map(({effect, time}) => {
-          return setTimeout(() => {
-            if (soundMap[effect]) {
-              soundMap[effect].play();
-            }
-          }, time);
-        });
-      };
-
-      // Cuando termine, limpiamos y actualizamos estado
-      utterance.onend = () => {
-        scheduledSounds.forEach(timeoutId => clearTimeout(timeoutId));
-        scheduledSounds = [];
-        isPlaying = false;
-        document.getElementById('status').textContent = "Narración finalizada.";
-      };
-
-      synth.speak(utterance);
-    }
-
-    function stopNarration() {
-      if (isPlaying) {
-        synth.cancel();
-        scheduledSounds.forEach(timeoutId => clearTimeout(timeoutId));
-        scheduledSounds = [];
-        isPlaying = false;
-        document.getElementById('status').textContent = "Narración detenida.";
-      }
-    }
-
-  </script>
+  // Exportar WAV simulado (solo aviso porque no podemos generar WAV real aquí)
+  exportWavBtn.onclick = () => {
+    alert('La exportación WAV real requiere servidor y procesamiento externo.\n\nPara tu flujo, podemos preparar un archivo de efectos sincronizados y usar un editor de audio para unirlos.\n\nPuedes usar la app para planificar y añadir efectos, luego exportar el texto con marcas.');
+  };
+</script>
 
 </body>
 </html>
