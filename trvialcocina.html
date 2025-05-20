@@ -2,204 +2,121 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trivial de Cocina</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #fffbe6;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .container {
+      font-family: sans-serif;
+      background: #fff8f0;
+      padding: 2rem;
       max-width: 600px;
+      margin: auto;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .answers button {
+      display: block;
       width: 100%;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      font-size: 1rem;
     }
-
-    #question {
-      font-size: 20px;
-      margin-bottom: 20px;
+    .timer-container {
+      margin-bottom: 1rem;
+      width: 100%;
+      background-color: #ddd;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
     }
-
-    .btn-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    button {
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background-color: #e0e0e0;
-      transition: background-color 0.2s;
-    }
-
-    button:hover {
-      background-color: #d5d5d5;
-    }
-
-    .btn.correct {
-      background-color: #b6e3b6;
-    }
-
-    .btn.wrong {
-      background-color: #f7b4b4;
-    }
-
-    .hide {
-      display: none;
-    }
-
-    #score {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    #timer {
-      font-size: 18px;
-      margin-top: 10px;
+    .timer-bar {
+      height: 100%;
+      background-color: #4caf50;
+      width: 100%;
+      transition: width 1s linear;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Trivial de Cocina</h1>
-    <div id="question">Pulsa "Empezar" para jugar</div>
-    <div class="btn-grid" id="answer-buttons"></div>
-    <button id="next-btn" class="hide">Siguiente</button>
-    <button id="start-btn">Empezar</button>
-    <div id="score">Puntuación: 0</div>
-    <div id="timer">Tiempo: <span id="time">15</span>s</div>
+  <h1>Trivial de Cocina</h1>
+  <div class="timer-container">
+    <div id="timer-bar" class="timer-bar"></div>
   </div>
+  <div class="question" id="question">Cargando...</div>
+  <div class="answers" id="answers"></div>
 
   <script>
-    const questionContainer = document.getElementById("question");
-    const answerButtons = document.getElementById("answer-buttons");
-    const nextButton = document.getElementById("next-btn");
-    const startButton = document.getElementById("start-btn");
-    const scoreElement = document.getElementById("score");
-    const timeElement = document.getElementById("time");
-
     let questions = [];
-    let shuffledQuestions = [];
-    let currentQuestionIndex = 0;
-    let score = 0;
+    let currentIndex = 0;
+    let time = 5;
     let timerInterval;
-    let timeLeft = 15;
 
-    fetch("preguntas.json")
-      .then(res => res.json())
-      .then(data => {
-        questions = data;
-      });
-
-    startButton.addEventListener("click", startGame);
-    nextButton.addEventListener("click", () => {
-      currentQuestionIndex++;
-      setNextQuestion();
-    });
-
-    function startGame() {
-      startButton.classList.add("hide");
-      shuffledQuestions = questions.sort(() => Math.random() - 0.5);
-      currentQuestionIndex = 0;
-      score = 0;
-      updateScore();
-      setNextQuestion();
+    async function loadQuestions() {
+      const res = await fetch('preguntas.json');
+      questions = await res.json();
+      shuffle(questions);
+      showQuestion();
     }
 
-    function setNextQuestion() {
-      resetState();
-      showQuestion(shuffledQuestions[currentQuestionIndex]);
-      startTimer();
-    }
-
-    function showQuestion(question) {
-      questionContainer.innerText = question.question;
-      question.answers.forEach(answer => {
-        const button = document.createElement("button");
-        button.innerText = answer.text;
-        button.classList.add("btn");
-        if (answer.correct) button.dataset.correct = answer.correct;
-        button.addEventListener("click", selectAnswer);
-        answerButtons.appendChild(button);
-      });
-    }
-
-    function resetState() {
-      clearInterval(timerInterval);
-      nextButton.classList.add("hide");
-      answerButtons.innerHTML = "";
-    }
-
-    function selectAnswer(e) {
-      clearInterval(timerInterval);
-      const selectedButton = e.target;
-      const correct = selectedButton.dataset.correct === "true";
-      setStatusClass(selectedButton, correct);
-      Array.from(answerButtons.children).forEach(button => {
-        setStatusClass(button, button.dataset.correct === "true");
-        button.disabled = true;
-      });
-      if (correct) score++;
-      updateScore();
-      if (shuffledQuestions.length > currentQuestionIndex + 1) {
-        nextButton.classList.remove("hide");
-      } else {
-        startButton.innerText = "Volver a jugar";
-        startButton.classList.remove("hide");
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
     }
 
-    function setStatusClass(element, correct) {
-      element.classList.remove("correct", "wrong");
-      if (correct) {
-        element.classList.add("correct");
-      } else {
-        element.classList.add("wrong");
+    function showQuestion() {
+      if (currentIndex >= questions.length) {
+        document.getElementById("question").innerText = "¡Juego terminado!";
+        document.getElementById("answers").innerHTML = "";
+        clearInterval(timerInterval);
+        return;
       }
-    }
 
-    function updateScore() {
-      scoreElement.innerText = `Puntuación: ${score}`;
+      const q = questions[currentIndex];
+      document.getElementById("question").innerText = q.question;
+      document.getElementById("answers").innerHTML = "";
+
+      q.answers.forEach((a) => {
+        const btn = document.createElement("button");
+        btn.innerText = a.text;
+        btn.onclick = () => {
+          clearInterval(timerInterval);
+          if (a.correct) {
+            alert("¡Correcto!");
+          } else {
+            alert("Incorrecto");
+          }
+          currentIndex++;
+          showQuestion();
+          startTimer();
+        };
+        document.getElementById("answers").appendChild(btn);
+      });
     }
 
     function startTimer() {
-      timeLeft = 15;
-      updateTimerDisplay();
+      time = 5;
+      document.getElementById("timer-bar").style.width = "100%"; // Reset the bar
+      clearInterval(timerInterval);
+
       timerInterval = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay();
-        if (timeLeft <= 0) {
+        time--;
+        const width = (time / 5) * 100; // Calculate the width based on remaining time
+        document.getElementById("timer-bar").style.width = `${width}%`;
+
+        if (time === 0) {
           clearInterval(timerInterval);
-          handleTimeout();
+          alert("¡Tiempo agotado!");
+          currentIndex++;
+          showQuestion();
+          startTimer();
         }
       }, 1000);
     }
 
-    function updateTimerDisplay() {
-      timeElement.innerText = timeLeft;
-    }
-
-    function handleTimeout() {
-      Array.from(answerButtons.children).forEach(button => {
-        const correct = button.dataset.correct === "true";
-        setStatusClass(button, correct);
-        button.disabled = true;
-      });
-      nextButton.classList.remove("hide");
-    }
+    loadQuestions().then(() => startTimer());
   </script>
 </body>
 </html>
