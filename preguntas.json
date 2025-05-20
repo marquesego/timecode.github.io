@@ -1,29 +1,422 @@
 [
   {
-    "question": "¿Qué ingrediente principal lleva el gazpacho?",
+    "question": "¿Qué tipo de arroz se usa tradicionalmente en la paella valenciana?",
     "answers": [
-      { "text": "Tomate", "correct": true },
-      { "text": "Pepino", "correct": false },
-      { "text": "Pimiento", "correct": false },
-      { "text": "Zanahoria", "correct": false }
+      {
+        "text": "Arborio",
+        "correct": false
+      },
+      {
+        "text": "Basmati",
+        "correct": false
+      },
+      {
+        "text": "Redondo",
+        "correct": true
+      },
+      {
+        "text": "Integral",
+        "correct": false
+      }
     ]
   },
   {
-    "question": "¿Cuál es el país de origen del sushi?",
+    "question": "¿Cuál es el principal ingrediente del gazpacho?",
     "answers": [
-      { "text": "China", "correct": false },
-      { "text": "Corea del Sur", "correct": false },
-      { "text": "Japón", "correct": true },
-      { "text": "Tailandia", "correct": false }
+      {
+        "text": "Pepino",
+        "correct": false
+      },
+      {
+        "text": "Pimiento",
+        "correct": false
+      },
+      {
+        "text": "Tomate",
+        "correct": true
+      },
+      {
+        "text": "Ajo",
+        "correct": false
+      }
     ]
   },
   {
-    "question": "¿Qué parte del animal es el solomillo?",
+    "question": "¿Qué fruta es la base del guacamole?",
     "answers": [
-      { "text": "Lomo", "correct": true },
-      { "text": "Costillas", "correct": false },
-      { "text": "Pierna", "correct": false },
-      { "text": "Pecho", "correct": false }
+      {
+        "text": "Tomate",
+        "correct": false
+      },
+      {
+        "text": "Aguacate",
+        "correct": true
+      },
+      {
+        "text": "Pepino",
+        "correct": false
+      },
+      {
+        "text": "Pimiento",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Cuál es el ingrediente principal de una bechamel?",
+    "answers": [
+      {
+        "text": "Harina",
+        "correct": false
+      },
+      {
+        "text": "Leche",
+        "correct": true
+      },
+      {
+        "text": "Mantequilla",
+        "correct": false
+      },
+      {
+        "text": "Huevo",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué pescado es típico en el bacalao al pil-pil?",
+    "answers": [
+      {
+        "text": "Merluza",
+        "correct": false
+      },
+      {
+        "text": "Salmón",
+        "correct": false
+      },
+      {
+        "text": "Bacalao",
+        "correct": true
+      },
+      {
+        "text": "Lubina",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué parte del cerdo se utiliza para el jamón ibérico?",
+    "answers": [
+      {
+        "text": "Paleta",
+        "correct": false
+      },
+      {
+        "text": "Costillar",
+        "correct": false
+      },
+      {
+        "text": "Pata trasera",
+        "correct": true
+      },
+      {
+        "text": "Lomo",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Cuál es el ingrediente base del hummus?",
+    "answers": [
+      {
+        "text": "Lentejas",
+        "correct": false
+      },
+      {
+        "text": "Garbanzos",
+        "correct": true
+      },
+      {
+        "text": "Judías",
+        "correct": false
+      },
+      {
+        "text": "Trigo",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué es el miso?",
+    "answers": [
+      {
+        "text": "Una sopa de pescado",
+        "correct": false
+      },
+      {
+        "text": "Una pasta fermentada de soja",
+        "correct": true
+      },
+      {
+        "text": "Un tipo de alga",
+        "correct": false
+      },
+      {
+        "text": "Un arroz glutinoso",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué ingrediente da color al risotto a la milanesa?",
+    "answers": [
+      {
+        "text": "Cúrcuma",
+        "correct": false
+      },
+      {
+        "text": "Azafrán",
+        "correct": true
+      },
+      {
+        "text": "Pimentón",
+        "correct": false
+      },
+      {
+        "text": "Curry",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Cuál es el nombre del pan plano típico de la India?",
+    "answers": [
+      {
+        "text": "Pita",
+        "correct": false
+      },
+      {
+        "text": "Tortilla",
+        "correct": false
+      },
+      {
+        "text": "Naan",
+        "correct": true
+      },
+      {
+        "text": "Chapati",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué marisco es típico en la zarzuela de mariscos?",
+    "answers": [
+      {
+        "text": "Langostinos",
+        "correct": true
+      },
+      {
+        "text": "Salmón",
+        "correct": false
+      },
+      {
+        "text": "Bacalao",
+        "correct": false
+      },
+      {
+        "text": "Trucha",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué bebida se utiliza en la receta del tiramisú tradicional?",
+    "answers": [
+      {
+        "text": "Café",
+        "correct": true
+      },
+      {
+        "text": "Té negro",
+        "correct": false
+      },
+      {
+        "text": "Vino tinto",
+        "correct": false
+      },
+      {
+        "text": "Ron",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Cuál de estos ingredientes no es un queso?",
+    "answers": [
+      {
+        "text": "Roquefort",
+        "correct": false
+      },
+      {
+        "text": "Mascarpone",
+        "correct": false
+      },
+      {
+        "text": "Prosciutto",
+        "correct": true
+      },
+      {
+        "text": "Gorgonzola",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué tipo de cocción es ‘pochado’?",
+    "answers": [
+      {
+        "text": "Al horno",
+        "correct": false
+      },
+      {
+        "text": "En aceite a baja temperatura",
+        "correct": true
+      },
+      {
+        "text": "Al vapor",
+        "correct": false
+      },
+      {
+        "text": "A la plancha",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué tipo de grasa se utiliza en la cocina confitada tradicional francesa?",
+    "answers": [
+      {
+        "text": "Aceite de oliva",
+        "correct": false
+      },
+      {
+        "text": "Mantequilla",
+        "correct": false
+      },
+      {
+        "text": "Grasa de pato",
+        "correct": true
+      },
+      {
+        "text": "Sebo",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué condimento contiene vinagre, aceite y mostaza?",
+    "answers": [
+      {
+        "text": "Alioli",
+        "correct": false
+      },
+      {
+        "text": "Vinagreta",
+        "correct": true
+      },
+      {
+        "text": "Pesto",
+        "correct": false
+      },
+      {
+        "text": "Salsa César",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Cuál es el nombre de la técnica japonesa de empanar y freír?",
+    "answers": [
+      {
+        "text": "Yakitori",
+        "correct": false
+      },
+      {
+        "text": "Tempura",
+        "correct": true
+      },
+      {
+        "text": "Sashimi",
+        "correct": false
+      },
+      {
+        "text": "Teriyaki",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué tipo de corte es el ‘juliana’?",
+    "answers": [
+      {
+        "text": "En rodajas gruesas",
+        "correct": false
+      },
+      {
+        "text": "En tiras finas",
+        "correct": true
+      },
+      {
+        "text": "En cubos",
+        "correct": false
+      },
+      {
+        "text": "En dados grandes",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué ingrediente da nombre a la salsa carbonara tradicional?",
+    "answers": [
+      {
+        "text": "Queso",
+        "correct": false
+      },
+      {
+        "text": "Carbón",
+        "correct": true
+      },
+      {
+        "text": "Pimienta",
+        "correct": false
+      },
+      {
+        "text": "Nata",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "¿Qué pescado se usa en el sushi?",
+    "answers": [
+      {
+        "text": "Trucha",
+        "correct": false
+      },
+      {
+        "text": "Salmón",
+        "correct": true
+      },
+      {
+        "text": "Lubina",
+        "correct": false
+      },
+      {
+        "text": "Perca",
+        "correct": false
+      }
     ]
   }
 ]
