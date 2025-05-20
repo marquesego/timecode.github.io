@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editor de Diagramas</title>
+  <script src="https://unpkg.com/konva@9.2.0/konva.min.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #container { width: 100%; height: 100%; background: #f4f4f4; }
+    #toolbar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <button onclick="addBox()">➕ Añadir caja</button>
+    <button onclick="exportDiagram()">💾 Exportar JSON</button>
+    <input type="file" onchange="importDiagram(event)" />
+  </div>
+  <div id="container"></div>
+
+  <script>
+    const stage = new Konva.Stage({
+      container: 'container',
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    function createBox(x, y, text = 'Caja') {
+      const group = new Konva.Group({
+        x, y, draggable: true
+      });
+
+      const rect = new Konva.Rect({
+        width: 120,
+        height: 50,
+        fill: '#fff',
+        stroke: 'black',
+        strokeWidth: 2,
+        cornerRadius: 5
+      });
+
+      const label = new Konva.Text({
+        text,
+        fontSize: 16,
+        fontFamily: 'Calibri',
+        fill: 'black',
+        padding: 10,
+        width: 120,
+        align: 'center'
+      });
+
+      group.add(rect);
+      group.add(label);
+
+      group.on('dblclick', () => {
+        const newText = prompt('Editar texto:', label.text());
+        if (newText !== null) {
+          label.text(newText);
+          layer.draw();
+        }
+      });
+
+      layer.add(group);
+      layer.draw();
+
+      return group;
+    }
+
+    function addBox() {
+      createBox(100 + Math.random() * 300, 100 + Math.random() * 200);
+    }
+
+    function exportDiagram() {
+      const boxes = [];
+      layer.getChildren().forEach(group => {
+        if (group.className === 'Group') {
+          const [rect, text] = group.getChildren();
+          boxes.push({
+            x: group.x(),
+            y: group.y(),
+            text: text.text(),
+          });
+        }
+      });
+      const blob = new Blob([JSON.stringify(boxes)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'diagrama.json';
+      a.click();
+    }
+
+    function importDiagram(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const boxes = JSON.parse(reader.result);
+          layer.destroyChildren();
+          boxes.forEach(({ x, y, text }) => createBox(x, y, text));
+          layer.draw();
+        } catch (e) {
+          alert('Archivo JSON inválido.');
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
