@@ -1,122 +1,90 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Editor de Diagramas</title>
-  <script src="https://unpkg.com/konva@9.2.0/konva.min.js"></script>
+  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
-    #container { width: 100vw; height: 100vh; background: #f0f0f0; }
-    #toolbar {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 100;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    }
-    #toolbar input[type="file"] {
-      display: inline-block;
-      margin-left: 10px;
-    }
+    body { margin: 20px; font-family: sans-serif; }
+    #container { border: 1px solid #ccc; width: 100%; height: 600px; }
+    button, input[type=file] { margin: 5px; }
   </style>
 </head>
 <body>
-  <div id="toolbar">
-    <button onclick="addBox()">➕ Añadir caja</button>
-    <button onclick="exportDiagram()">💾 Exportar JSON</button>
-    <input type="file" accept=".json" onchange="importDiagram(event)" />
-  </div>
+  <h1>Editor de Diagramas</h1>
+  <button onclick="addBox()">Añadir Caja</button>
+  <button onclick="exportJSON()">Exportar JSON</button>
+  <input type="file" accept=".json" onchange="importJSON(event)" />
   <div id="container"></div>
 
   <script>
-    const stage = new Konva.Stage({
-      container: 'container',
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
+    const width = window.innerWidth - 40;
+    const height = 600;
 
+    const stage = new Konva.Stage({ container: 'container', width, height });
     const layer = new Konva.Layer();
     stage.add(layer);
 
-    function createBox(x, y, text = 'Caja') {
-      const group = new Konva.Group({
-        x, y, draggable: true
-      });
+    function addBox(x = 50, y = 50, text = 'Caja') {
+      const group = new Konva.Group({ x, y, draggable: true });
 
       const rect = new Konva.Rect({
         width: 120,
         height: 50,
-        fill: '#fff',
+        fill: '#89b717',
         stroke: 'black',
         strokeWidth: 2,
-        cornerRadius: 5
+        cornerRadius: 8
       });
 
       const label = new Konva.Text({
         text,
         fontSize: 16,
-        fontFamily: 'Calibri',
-        fill: 'black',
-        padding: 10,
+        fill: 'white',
+        align: 'center',
+        verticalAlign: 'middle',
         width: 120,
-        align: 'center'
+        height: 50,
+        padding: 10
       });
 
       group.add(rect);
       group.add(label);
-
-      group.on('dblclick', () => {
-        const newText = prompt('Editar texto:', label.text());
-        if (newText !== null) {
-          label.text(newText);
-          layer.draw();
-        }
-      });
-
       layer.add(group);
       layer.draw();
-
-      return group;
     }
 
-    function addBox() {
-      createBox(100 + Math.random() * 300, 100 + Math.random() * 200);
-    }
-
-    function exportDiagram() {
+    function exportJSON() {
       const boxes = [];
       layer.getChildren().forEach(group => {
-        if (group.className === 'Group') {
-          const [rect, text] = group.getChildren();
-          boxes.push({
-            x: group.x(),
-            y: group.y(),
-            text: text.text(),
-          });
-        }
+        const [rect, text] = group.getChildren();
+        boxes.push({
+          x: group.x(),
+          y: group.y(),
+          text: text.text()
+        });
       });
       const blob = new Blob([JSON.stringify(boxes, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      a.href = url;
       a.download = 'diagrama.json';
       a.click();
+      URL.revokeObjectURL(url);
     }
 
-    function importDiagram(event) {
+    function importJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         try {
-          const boxes = JSON.parse(reader.result);
+          const data = JSON.parse(reader.result);
           layer.destroyChildren();
-          boxes.forEach(({ x, y, text }) => createBox(x, y, text));
+          data.forEach(item => addBox(item.x, item.y, item.text));
           layer.draw();
         } catch (e) {
-          alert('Archivo JSON inválido.');
+          alert('Error al importar JSON. Asegúrate de que el archivo tenga el formato correcto.');
           console.error(e);
         }
       };
