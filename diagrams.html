@@ -23,11 +23,9 @@
 
     const stage = new Konva.Stage({ container: 'container', width, height });
     const layer = new Konva.Layer();
-    const connectionLayer = new Konva.Layer();
-    stage.add(connectionLayer);
     stage.add(layer);
 
-    const connections = [];
+    const arrows = [];
     let selectedBox = null;
 
     function addBox(x = 50, y = 50, text = 'Caja') {
@@ -56,73 +54,81 @@
       group.add(rect);
       group.add(label);
       layer.add(group);
+      layer.draw();
 
       group.on('dblclick', () => {
-        const newText = prompt('Nuevo texto para la caja:', label.text());
-        if (newText !== null) {
+        const newText = prompt('Nuevo texto:', label.text());
+        if (newText) {
           label.text(newText);
           layer.draw();
         }
       });
 
       group.on('click', () => {
-        if (!selectedBox) {
-          selectedBox = group;
-        } else if (selectedBox !== group) {
-          createConnection(selectedBox, group);
+        if (selectedBox && selectedBox !== group) {
+          drawArrow(selectedBox, group);
           selectedBox = null;
         } else {
-          selectedBox = null;
+          selectedBox = group;
         }
       });
 
-      group.on('dragmove', () => {
-        updateConnections();
-      });
+      group.on('dragmove', () => updateArrows());
+    }
 
+    function drawArrow(fromGroup, toGroup) {
+      const arrow = new Konva.Arrow({
+        points: getArrowPoints(fromGroup, toGroup),
+        stroke: 'black',
+        fill: 'black',
+        pointerLength: 10,
+        pointerWidth: 10,
+        tension: 0,
+      });
+      arrow.from = fromGroup;
+      arrow.to = toGroup;
+      arrows.push(arrow);
+      layer.add(arrow);
       layer.draw();
     }
 
-    function createConnection(fromGroup, toGroup) {
-      const line = new Konva.Arrow({
-        points: getConnectionPoints(fromGroup, toGroup),
-        pointerLength: 10,
-        pointerWidth: 10,
-        fill: 'black',
-        stroke: 'black',
-        strokeWidth: 2
-      });
-      connectionLayer.add(line);
-      connections.push({ from: fromGroup, to: toGroup, line });
-      connectionLayer.draw();
+    function getArrowPoints(fromGroup, toGroup) {
+      const from = fromGroup.getClientRect();
+      const to = toGroup.getClientRect();
+      return [
+        from.x + from.width / 2,
+        from.y + from.height / 2,
+        to.x + to.width / 2,
+        to.y + to.height / 2
+      ];
     }
 
-    function getConnectionPoints(fromGroup, toGroup) {
-      const startX = fromGroup.x() + 60;
-      const startY = fromGroup.y() + 25;
-      const endX = toGroup.x() + 60;
-      const endY = toGroup.y() + 25;
-      return [startX, startY, endX, endY];
-    }
-
-    function updateConnections() {
-      connections.forEach(conn => {
-        conn.line.points(getConnectionPoints(conn.from, conn.to));
+    function updateArrows() {
+      arrows.forEach(arrow => {
+        arrow.points(getArrowPoints(arrow.from, arrow.to));
       });
-      connectionLayer.batchDraw();
+      layer.batchDraw();
     }
 
     function exportJSON() {
       const boxes = [];
+      const lines = arrows.map(arrow => ({
+        from: layer.getChildren().indexOf(arrow.from),
+        to: layer.getChildren().indexOf(arrow.to)
+      }));
+
       layer.getChildren().forEach(group => {
         const [rect, text] = group.getChildren();
-        boxes.push({
-          x: group.x(),
-          y: group.y(),
-          text: text.text()
-        });
+        if (text instanceof Konva.Text) {
+          boxes.push({
+            x: group.x(),
+            y: group.y(),
+            text: text.text()
+          });
+        }
       });
-      const blob = new Blob([JSON.stringify(boxes, null, 2)], { type: 'application/json' });
+
+      const blob = new Blob([JSON.stringify({ boxes, lines }, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -139,12 +145,20 @@
         try {
           const data = JSON.parse(reader.result);
           layer.destroyChildren();
-          connectionLayer.destroyChildren();
-          connections.length = 0;
-          data.forEach(item => addBox(item.x, item.y, item.text));
+          arrows.length = 0;
+
+          const groups = data.boxes.map(box => {
+            addBox(box.x, box.y, box.text);
+            return layer.getChildren()[layer.getChildren().length - 1];
+          });
+
+          data.lines?.forEach(line => {
+            drawArrow(groups[line.from], groups[line.to]);
+          });
+
           layer.draw();
         } catch (e) {
-          alert('Error al importar JSON. Asegúrate de que el archivo tenga el formato correcto.');
+          alert('Error al importar JSON.');
           console.error(e);
         }
       };
