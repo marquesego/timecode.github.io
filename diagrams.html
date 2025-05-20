@@ -1,111 +1,116 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Editor de Diagramas Avanzado</title>
-  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagram Editor</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    #container { border: 1px solid #ccc; width: 100%; height: 600px; }
-    button, input { margin: 5px; }
+    body { margin: 0; font-family: sans-serif; }
+    #toolbar {
+      background: #333;
+      color: white;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #container {
+      width: 100vw;
+      height: calc(100vh - 50px);
+    }
+    button { cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>Editor de Diagramas Avanzado</h1>
-  <button onclick="addNode()">➕ Añadir caja</button>
-  <button onclick="startConnecting()">🔗 Conectar cajas</button>
-  <button onclick="exportDiagram()">💾 Exportar JSON</button>
-  <input type="file" onchange="importDiagram(event)" />
+  <div id="toolbar">
+    <button onclick="addBox()">Añadir Caja</button>
+    <button onclick="exportDiagram()">Exportar</button>
+    <input type="file" onchange="importDiagram(event)" />
+  </div>
   <div id="container"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/konva@9.2.0/konva.min.js"></script>
   <script>
-    const width = window.innerWidth - 40;
-    const height = 600;
+    const width = window.innerWidth;
+    const height = window.innerHeight - 50;
 
-    const stage = new Konva.Stage({ container: 'container', width, height });
+    const stage = new Konva.Stage({ container: 'container', width, height, draggable: true });
     const layer = new Konva.Layer();
     stage.add(layer);
 
-    const arrows = [];
-    const nodes = [];
-    let connectMode = false;
-    let fromNode = null;
+    let boxes = [];
+    let arrows = [];
+    let selectedBox = null;
+    let connecting = false;
+    let connectFrom = null;
 
-    function addNode(x = 100, y = 100, text = 'Caja') {
-      const group = new Konva.Group({ x, y, draggable: true });
+    function addBox() {
+      const group = new Konva.Group({ x: 50, y: 50, draggable: true });
 
-      const rect = new Konva.Rect({
-        width: 120,
-        height: 50,
-        fill: '#3498db',
-        stroke: 'black',
-        strokeWidth: 2,
-        cornerRadius: 6
-      });
-
-      const label = new Konva.Text({
-        text,
-        fontSize: 16,
-        fill: 'white',
-        align: 'center',
-        verticalAlign: 'middle',
-        width: 120,
-        height: 50,
-        padding: 10
-      });
+      const rect = new Konva.Rect({ width: 120, height: 50, fill: '#89b717', cornerRadius: 5, shadowBlur: 5 });
+      const text = new Konva.Text({ text: 'Nueva caja', fontSize: 16, fill: 'white', padding: 10 });
+      const box = { group, rect, text };
 
       group.add(rect);
-      group.add(label);
+      group.add(text);
       layer.add(group);
-      nodes.push(group);
 
       group.on('dblclick', () => {
-        const newText = prompt('Nuevo texto:', label.text());
-        if (newText) {
-          label.text(newText);
-          layer.draw();
-        }
+        const name = prompt('Nuevo nombre:', text.text());
+        if (name) text.text(name);
       });
 
       group.on('dragmove', updateArrows);
 
       group.on('click', () => {
-        if (connectMode) {
-          if (!fromNode) {
-            fromNode = group;
-            highlight(group, true);
-          } else {
-            if (fromNode !== group) {
-              drawArrow(fromNode, group);
-            }
-            highlight(fromNode, false);
-            fromNode = null;
-            connectMode = false;
-          }
+        if (connecting && connectFrom && connectFrom !== group) {
+          createArrow(connectFrom, group);
+          connecting = false;
+          connectFrom = null;
+        } else {
+          connectFrom = group;
+          connecting = true;
         }
       });
 
+      boxes.push(box);
       layer.draw();
     }
 
-    function highlight(group, state) {
-      const rect = group.findOne('Rect');
-      rect.stroke(state ? 'red' : 'black');
-      layer.draw();
+    function getConnectorPoints(from, to) {
+      const fBox = from.getClientRect();
+      const tBox = to.getClientRect();
+
+      const fx = fBox.x + fBox.width / 2;
+      const fy = fBox.y + fBox.height / 2;
+      const tx = tBox.x + tBox.width / 2;
+      const ty = tBox.y + tBox.height / 2;
+
+      const dx = tx - fx;
+      const dy = ty - fy;
+
+      let fromPoint, toPoint;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        fromPoint = [dx > 0 ? fBox.x + fBox.width : fBox.x, fy];
+        toPoint = [dx > 0 ? tBox.x : tBox.x + tBox.width, ty];
+      } else {
+        fromPoint = [fx, dy > 0 ? fBox.y + fBox.height : fBox.y];
+        toPoint = [tx, dy > 0 ? tBox.y : tBox.y + tBox.height];
+      }
+
+      return [...fromPoint, ...toPoint];
     }
 
-    function startConnecting() {
-      connectMode = true;
-      fromNode = null;
-    }
-
-    function drawArrow(from, to) {
+    function createArrow(from, to) {
+      const points = getConnectorPoints(from, to);
       const arrow = new Konva.Arrow({
-        points: getPoints(from, to),
-        stroke: 'black',
-        fill: 'black',
+        points,
         pointerLength: 10,
-        pointerWidth: 10
+        pointerWidth: 10,
+        fill: 'black',
+        stroke: 'black',
+        strokeWidth: 2,
       });
       arrow.from = from;
       arrow.to = to;
@@ -114,43 +119,30 @@
       layer.draw();
     }
 
-    function getPoints(from, to) {
-      const fromBox = from.getClientRect();
-      const toBox = to.getClientRect();
-      return [
-        fromBox.x + fromBox.width / 2,
-        fromBox.y + fromBox.height / 2,
-        toBox.x + toBox.width / 2,
-        toBox.y + toBox.height / 2
-      ];
-    }
-
     function updateArrows() {
       arrows.forEach(arrow => {
-        arrow.points(getPoints(arrow.from, arrow.to));
+        arrow.points(getConnectorPoints(arrow.from, arrow.to));
       });
       layer.batchDraw();
     }
 
     function exportDiagram() {
       const data = {
-        nodes: nodes.map(n => {
-          const text = n.findOne('Text').text();
-          return { x: n.x(), y: n.y(), text };
-        }),
-        links: arrows.map(a => ({
-          from: nodes.indexOf(a.from),
-          to: nodes.indexOf(a.to)
+        boxes: boxes.map(b => ({
+          x: b.group.x(),
+          y: b.group.y(),
+          text: b.text.text()
+        })),
+        arrows: arrows.map(a => ({
+          from: boxes.indexOf(boxes.find(b => b.group === a.from)),
+          to: boxes.indexOf(boxes.find(b => b.group === a.to))
         }))
       };
-
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
       const a = document.createElement('a');
-      a.href = url;
-      a.download = 'diagrama.json';
+      a.href = URL.createObjectURL(blob);
+      a.download = 'diagram.json';
       a.click();
-      URL.revokeObjectURL(url);
     }
 
     function importDiagram(event) {
@@ -158,22 +150,62 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
-        try {
-          const data = JSON.parse(reader.result);
-          layer.destroyChildren();
-          arrows.length = 0;
-          nodes.length = 0;
+        const data = JSON.parse(reader.result);
+        boxes.forEach(b => b.group.destroy());
+        arrows.forEach(a => a.destroy());
+        boxes = [];
+        arrows = [];
 
-          data.nodes.forEach(n => addNode(n.x, n.y, n.text));
-          data.links.forEach(link => drawArrow(nodes[link.from], nodes[link.to]));
+        data.boxes.forEach(b => {
+          const group = new Konva.Group({ x: b.x, y: b.y, draggable: true });
+          const rect = new Konva.Rect({ width: 120, height: 50, fill: '#89b717', cornerRadius: 5, shadowBlur: 5 });
+          const text = new Konva.Text({ text: b.text, fontSize: 16, fill: 'white', padding: 10 });
+          group.add(rect);
+          group.add(text);
+          layer.add(group);
 
-        } catch (e) {
-          alert('Error al importar: JSON inválido.');
-          console.error(e);
-        }
+          group.on('dblclick', () => {
+            const name = prompt('Nuevo nombre:', text.text());
+            if (name) text.text(name);
+          });
+
+          group.on('dragmove', updateArrows);
+          group.on('click', () => {
+            if (connecting && connectFrom && connectFrom !== group) {
+              createArrow(connectFrom, group);
+              connecting = false;
+              connectFrom = null;
+            } else {
+              connectFrom = group;
+              connecting = true;
+            }
+          });
+
+          boxes.push({ group, rect, text });
+        });
+
+        data.arrows.forEach(a => {
+          createArrow(boxes[a.from].group, boxes[a.to].group);
+        });
       };
       reader.readAsText(file);
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Delete' && selectedBox) {
+        arrows = arrows.filter(a => {
+          if (a.from === selectedBox || a.to === selectedBox) {
+            a.destroy();
+            return false;
+          }
+          return true;
+        });
+        selectedBox.destroy();
+        boxes = boxes.filter(b => b.group !== selectedBox);
+        selectedBox = null;
+        layer.draw();
+      }
+    });
   </script>
 </body>
 </html>
