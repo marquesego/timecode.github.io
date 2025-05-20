@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Editor de Diagramas</title>
+  <meta charset="UTF-8" />
+  <title>Editor de Diagramas Avanzado</title>
   <script src="https://unpkg.com/konva@9/konva.min.js"></script>
   <style>
-    body { margin: 20px; font-family: sans-serif; }
+    body { font-family: sans-serif; margin: 20px; }
     #container { border: 1px solid #ccc; width: 100%; height: 600px; }
-    button, input[type=file] { margin: 5px; }
+    button, input { margin: 5px; }
   </style>
 </head>
 <body>
-  <h1>Editor de Diagramas</h1>
-  <button onclick="addBox()">Añadir Caja</button>
-  <button onclick="exportJSON()">Exportar JSON</button>
-  <input type="file" accept=".json" onchange="importJSON(event)" />
+  <h1>Editor de Diagramas Avanzado</h1>
+  <button onclick="addNode()">➕ Añadir caja</button>
+  <button onclick="startConnecting()">🔗 Conectar cajas</button>
+  <button onclick="exportDiagram()">💾 Exportar JSON</button>
+  <input type="file" onchange="importDiagram(event)" />
   <div id="container"></div>
 
   <script>
@@ -26,18 +27,20 @@
     stage.add(layer);
 
     const arrows = [];
-    let selectedBox = null;
+    const nodes = [];
+    let connectMode = false;
+    let fromNode = null;
 
-    function addBox(x = 50, y = 50, text = 'Caja') {
+    function addNode(x = 100, y = 100, text = 'Caja') {
       const group = new Konva.Group({ x, y, draggable: true });
 
       const rect = new Konva.Rect({
         width: 120,
         height: 50,
-        fill: '#89b717',
+        fill: '#3498db',
         stroke: 'black',
         strokeWidth: 2,
-        cornerRadius: 8
+        cornerRadius: 6
       });
 
       const label = new Konva.Text({
@@ -54,7 +57,7 @@
       group.add(rect);
       group.add(label);
       layer.add(group);
-      layer.draw();
+      nodes.push(group);
 
       group.on('dblclick', () => {
         const newText = prompt('Nuevo texto:', label.text());
@@ -64,71 +67,84 @@
         }
       });
 
+      group.on('dragmove', updateArrows);
+
       group.on('click', () => {
-        if (selectedBox && selectedBox !== group) {
-          drawArrow(selectedBox, group);
-          selectedBox = null;
-        } else {
-          selectedBox = group;
+        if (connectMode) {
+          if (!fromNode) {
+            fromNode = group;
+            highlight(group, true);
+          } else {
+            if (fromNode !== group) {
+              drawArrow(fromNode, group);
+            }
+            highlight(fromNode, false);
+            fromNode = null;
+            connectMode = false;
+          }
         }
       });
 
-      group.on('dragmove', () => updateArrows());
+      layer.draw();
     }
 
-    function drawArrow(fromGroup, toGroup) {
+    function highlight(group, state) {
+      const rect = group.findOne('Rect');
+      rect.stroke(state ? 'red' : 'black');
+      layer.draw();
+    }
+
+    function startConnecting() {
+      connectMode = true;
+      fromNode = null;
+    }
+
+    function drawArrow(from, to) {
       const arrow = new Konva.Arrow({
-        points: getArrowPoints(fromGroup, toGroup),
+        points: getPoints(from, to),
         stroke: 'black',
         fill: 'black',
         pointerLength: 10,
-        pointerWidth: 10,
-        tension: 0,
+        pointerWidth: 10
       });
-      arrow.from = fromGroup;
-      arrow.to = toGroup;
+      arrow.from = from;
+      arrow.to = to;
       arrows.push(arrow);
       layer.add(arrow);
       layer.draw();
     }
 
-    function getArrowPoints(fromGroup, toGroup) {
-      const from = fromGroup.getClientRect();
-      const to = toGroup.getClientRect();
+    function getPoints(from, to) {
+      const fromBox = from.getClientRect();
+      const toBox = to.getClientRect();
       return [
-        from.x + from.width / 2,
-        from.y + from.height / 2,
-        to.x + to.width / 2,
-        to.y + to.height / 2
+        fromBox.x + fromBox.width / 2,
+        fromBox.y + fromBox.height / 2,
+        toBox.x + toBox.width / 2,
+        toBox.y + toBox.height / 2
       ];
     }
 
     function updateArrows() {
       arrows.forEach(arrow => {
-        arrow.points(getArrowPoints(arrow.from, arrow.to));
+        arrow.points(getPoints(arrow.from, arrow.to));
       });
       layer.batchDraw();
     }
 
-    function exportJSON() {
-      const boxes = [];
-      const lines = arrows.map(arrow => ({
-        from: layer.getChildren().indexOf(arrow.from),
-        to: layer.getChildren().indexOf(arrow.to)
-      }));
+    function exportDiagram() {
+      const data = {
+        nodes: nodes.map(n => {
+          const text = n.findOne('Text').text();
+          return { x: n.x(), y: n.y(), text };
+        }),
+        links: arrows.map(a => ({
+          from: nodes.indexOf(a.from),
+          to: nodes.indexOf(a.to)
+        }))
+      };
 
-      layer.getChildren().forEach(group => {
-        const [rect, text] = group.getChildren();
-        if (text instanceof Konva.Text) {
-          boxes.push({
-            x: group.x(),
-            y: group.y(),
-            text: text.text()
-          });
-        }
-      });
-
-      const blob = new Blob([JSON.stringify({ boxes, lines }, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -137,7 +153,7 @@
       URL.revokeObjectURL(url);
     }
 
-    function importJSON(event) {
+    function importDiagram(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -146,19 +162,13 @@
           const data = JSON.parse(reader.result);
           layer.destroyChildren();
           arrows.length = 0;
+          nodes.length = 0;
 
-          const groups = data.boxes.map(box => {
-            addBox(box.x, box.y, box.text);
-            return layer.getChildren()[layer.getChildren().length - 1];
-          });
+          data.nodes.forEach(n => addNode(n.x, n.y, n.text));
+          data.links.forEach(link => drawArrow(nodes[link.from], nodes[link.to]));
 
-          data.lines?.forEach(line => {
-            drawArrow(groups[line.from], groups[line.to]);
-          });
-
-          layer.draw();
         } catch (e) {
-          alert('Error al importar JSON.');
+          alert('Error al importar: JSON inválido.');
           console.error(e);
         }
       };
