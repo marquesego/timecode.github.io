@@ -2,136 +2,149 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trivial de Cocina</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #fffaf0;
+      background: #fffbe6;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
     }
 
     .container {
       max-width: 600px;
-      margin: auto;
+      width: 100%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    .btn {
-      padding: 10px 20px;
-      margin: 10px;
-      background-color: #ff6347;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .btn:hover {
-      background-color: #e5533f;
+    #question {
+      font-size: 20px;
+      margin-bottom: 20px;
     }
 
     .btn-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #e0e0e0;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #d5d5d5;
+    }
+
+    .btn.correct {
+      background-color: #b6e3b6;
+    }
+
+    .btn.wrong {
+      background-color: #f7b4b4;
     }
 
     .hide {
       display: none;
     }
 
-    .correct {
-      background-color: #4caf50 !important;
+    #score {
+      margin-top: 10px;
+      font-weight: bold;
     }
 
-    .wrong {
-      background-color: #f44336 !important;
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Trivial de Cocina</h1>
-    <div id="question-container" class="hide">
-      <div id="question">Pregunta aquí</div>
-      <div id="answer-buttons" class="btn-grid"></div>
-    </div>
-    <div class="controls">
-      <button id="start-btn" class="btn">Comenzar</button>
-      <button id="next-btn" class="btn hide">Siguiente</button>
-    </div>
-    <div id="score-container" class="hide">Puntuación: <span id="score">0</span></div>
+    <div id="question">Pulsa "Empezar" para jugar</div>
+    <div class="btn-grid" id="answer-buttons"></div>
+    <button id="next-btn" class="hide">Siguiente</button>
+    <button id="start-btn">Empezar</button>
+    <div id="score">Puntuación: 0</div>
+    <div id="timer">Tiempo: <span id="time">15</span>s</div>
   </div>
 
   <script>
-    const startButton = document.getElementById('start-btn');
-    const nextButton = document.getElementById('next-btn');
-    const questionContainer = document.getElementById('question-container');
-    const questionElement = document.getElementById('question');
-    const answerButtons = document.getElementById('answer-buttons');
-    const scoreContainer = document.getElementById('score-container');
-    const scoreElement = document.getElementById('score');
+    const questionContainer = document.getElementById("question");
+    const answerButtons = document.getElementById("answer-buttons");
+    const nextButton = document.getElementById("next-btn");
+    const startButton = document.getElementById("start-btn");
+    const scoreElement = document.getElementById("score");
+    const timeElement = document.getElementById("time");
 
-    let shuffledQuestions, currentQuestionIndex, score, questions;
+    let questions = [];
+    let shuffledQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timerInterval;
+    let timeLeft = 15;
 
-    startButton.addEventListener('click', startGame);
-    nextButton.addEventListener('click', () => {
+    fetch("preguntas.json")
+      .then(res => res.json())
+      .then(data => {
+        questions = data;
+      });
+
+    startButton.addEventListener("click", startGame);
+    nextButton.addEventListener("click", () => {
       currentQuestionIndex++;
       setNextQuestion();
     });
 
-    async function startGame() {
-      startButton.classList.add('hide');
-      score = 0;
-      scoreContainer.classList.remove('hide');
-      questions = await loadQuestions();
+    function startGame() {
+      startButton.classList.add("hide");
       shuffledQuestions = questions.sort(() => Math.random() - 0.5);
       currentQuestionIndex = 0;
-      questionContainer.classList.remove('hide');
-      setNextQuestion();
+      score = 0;
       updateScore();
-    }
-
-    async function loadQuestions() {
-      try {
-        const res = await fetch('preguntas.json');
-        return await res.json();
-      } catch (error) {
-        alert("Error cargando las preguntas");
-        console.error(error);
-        return [];
-      }
+      setNextQuestion();
     }
 
     function setNextQuestion() {
       resetState();
       showQuestion(shuffledQuestions[currentQuestionIndex]);
+      startTimer();
     }
 
     function showQuestion(question) {
-      questionElement.innerText = question.question;
+      questionContainer.innerText = question.question;
       question.answers.forEach(answer => {
-        const button = document.createElement('button');
+        const button = document.createElement("button");
         button.innerText = answer.text;
-        button.classList.add('btn');
-        if (answer.correct) {
-          button.dataset.correct = true;
-        }
-        button.addEventListener('click', selectAnswer);
+        button.classList.add("btn");
+        if (answer.correct) button.dataset.correct = answer.correct;
+        button.addEventListener("click", selectAnswer);
         answerButtons.appendChild(button);
       });
     }
 
     function resetState() {
-      clearStatusClass(document.body);
-      nextButton.classList.add('hide');
-      while (answerButtons.firstChild) {
-        answerButtons.removeChild(answerButtons.firstChild);
-      }
+      clearInterval(timerInterval);
+      nextButton.classList.add("hide");
+      answerButtons.innerHTML = "";
     }
 
     function selectAnswer(e) {
+      clearInterval(timerInterval);
       const selectedButton = e.target;
       const correct = selectedButton.dataset.correct === "true";
       setStatusClass(selectedButton, correct);
@@ -142,29 +155,50 @@
       if (correct) score++;
       updateScore();
       if (shuffledQuestions.length > currentQuestionIndex + 1) {
-        nextButton.classList.remove('hide');
+        nextButton.classList.remove("hide");
       } else {
-        startButton.innerText = 'Volver a jugar';
-        startButton.classList.remove('hide');
+        startButton.innerText = "Volver a jugar";
+        startButton.classList.remove("hide");
+      }
+    }
+
+    function setStatusClass(element, correct) {
+      element.classList.remove("correct", "wrong");
+      if (correct) {
+        element.classList.add("correct");
+      } else {
+        element.classList.add("wrong");
       }
     }
 
     function updateScore() {
-      scoreElement.innerText = score;
+      scoreElement.innerText = `Puntuación: ${score}`;
     }
 
-    function setStatusClass(element, correct) {
-      clearStatusClass(element);
-      if (correct) {
-        element.classList.add('correct');
-      } else {
-        element.classList.add('wrong');
-      }
+    function startTimer() {
+      timeLeft = 15;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
     }
 
-    function clearStatusClass(element) {
-      element.classList.remove('correct');
-      element.classList.remove('wrong');
+    function updateTimerDisplay() {
+      timeElement.innerText = timeLeft;
+    }
+
+    function handleTimeout() {
+      Array.from(answerButtons.children).forEach(button => {
+        const correct = button.dataset.correct === "true";
+        setStatusClass(button, correct);
+        button.disabled = true;
+      });
+      nextButton.classList.remove("hide");
     }
   </script>
 </body>
