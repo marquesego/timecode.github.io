@@ -1,0 +1,29 @@
+[
+  {
+    "question": "¿Qué ingrediente principal lleva el gazpacho?",
+    "answers": [
+      { "text": "Tomate", "correct": true },
+      { "text": "Pepino", "correct": false },
+      { "text": "Pimiento", "correct": false },
+      { "text": "Zanahoria", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Cuál es el país de origen del sushi?",
+    "answers": [
+      { "text": "China", "correct": false },
+      { "text": "Corea del Sur", "correct": false },
+      { "text": "Japón", "correct": true },
+      { "text": "Tailandia", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué parte del animal es el solomillo?",
+    "answers": [
+      { "text": "Lomo", "correct": true },
+      { "text": "Costillas", "correct": false },
+      { "text": "Pierna", "correct": false },
+      { "text": "Pecho", "correct": false }
+    ]
+  }
+]

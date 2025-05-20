@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Trivial de Cocina</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffaf0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #ff6347;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .btn:hover {
+      background-color: #e5533f;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    .correct {
+      background-color: #4caf50 !important;
+    }
+
+    .wrong {
+      background-color: #f44336 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Trivial de Cocina</h1>
+    <div id="question-container" class="hide">
+      <div id="question">Pregunta aquí</div>
+      <div id="answer-buttons" class="btn-grid"></div>
+    </div>
+    <div class="controls">
+      <button id="start-btn" class="btn">Comenzar</button>
+      <button id="next-btn" class="btn hide">Siguiente</button>
+    </div>
+    <div id="score-container" class="hide">Puntuación: <span id="score">0</span></div>
+  </div>
+
+  <script>
+    const startButton = document.getElementById('start-btn');
+    const nextButton = document.getElementById('next-btn');
+    const questionContainer = document.getElementById('question-container');
+    const questionElement = document.getElementById('question');
+    const answerButtons = document.getElementById('answer-buttons');
+    const scoreContainer = document.getElementById('score-container');
+    const scoreElement = document.getElementById('score');
+
+    let shuffledQuestions, currentQuestionIndex, score, questions;
+
+    startButton.addEventListener('click', startGame);
+    nextButton.addEventListener('click', () => {
+      currentQuestionIndex++;
+      setNextQuestion();
+    });
+
+    async function startGame() {
+      startButton.classList.add('hide');
+      score = 0;
+      scoreContainer.classList.remove('hide');
+      questions = await loadQuestions();
+      shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+      currentQuestionIndex = 0;
+      questionContainer.classList.remove('hide');
+      setNextQuestion();
+      updateScore();
+    }
+
+    async function loadQuestions() {
+      try {
+        const res = await fetch('preguntas.json');
+        return await res.json();
+      } catch (error) {
+        alert("Error cargando las preguntas");
+        console.error(error);
+        return [];
+      }
+    }
+
+    function setNextQuestion() {
+      resetState();
+      showQuestion(shuffledQuestions[currentQuestionIndex]);
+    }
+
+    function showQuestion(question) {
+      questionElement.innerText = question.question;
+      question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        if (answer.correct) {
+          button.dataset.correct = true;
+        }
+        button.addEventListener('click', selectAnswer);
+        answerButtons.appendChild(button);
+      });
+    }
+
+    function resetState() {
+      clearStatusClass(document.body);
+      nextButton.classList.add('hide');
+      while (answerButtons.firstChild) {
+        answerButtons.removeChild(answerButtons.firstChild);
+      }
+    }
+
+    function selectAnswer(e) {
+      const selectedButton = e.target;
+      const correct = selectedButton.dataset.correct === "true";
+      setStatusClass(selectedButton, correct);
+      Array.from(answerButtons.children).forEach(button => {
+        setStatusClass(button, button.dataset.correct === "true");
+        button.disabled = true;
+      });
+      if (correct) score++;
+      updateScore();
+      if (shuffledQuestions.length > currentQuestionIndex + 1) {
+        nextButton.classList.remove('hide');
+      } else {
+        startButton.innerText = 'Volver a jugar';
+        startButton.classList.remove('hide');
+      }
+    }
+
+    function updateScore() {
+      scoreElement.innerText = score;
+    }
+
+    function setStatusClass(element, correct) {
+      clearStatusClass(element);
+      if (correct) {
+        element.classList.add('correct');
+      } else {
+        element.classList.add('wrong');
+      }
+    }
+
+    function clearStatusClass(element) {
+      element.classList.remove('correct');
+      element.classList.remove('wrong');
+    }
+  </script>
+</body>
+</html>
