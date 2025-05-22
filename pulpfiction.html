@@ -1,105 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Trivial Pulp Fiction 🎬</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #111;
+      font-family: 'Arial', sans-serif;
+      background: url('img/fondo_pulp.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: #fff;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      margin: 20px;
-      color: #ffc107;
-    }
-
-    #trivial {
-      max-width: 600px;
-      background: #222;
+      text-align: center;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #000;
     }
-
+    .contenedor {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
     .pregunta {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
+      font-size: 1.5em;
+      margin-bottom: 15px;
     }
-
     .respuestas button {
       display: block;
-      width: 100%;
-      margin: 5px 0;
-      padding: 10px;
-      font-size: 1rem;
-      background: #333;
+      margin: 10px auto;
+      padding: 10px 20px;
+      background-color: #333;
       color: #fff;
-      border: 1px solid #444;
-      border-radius: 5px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
     }
-
     .respuestas button:hover {
-      background: #444;
+      background-color: #555;
     }
-
     #resultado {
       margin-top: 20px;
-      font-size: 1.2rem;
+      font-weight: bold;
+      font-size: 1.2em;
     }
-
     #barraTiempo {
       height: 10px;
-      background: #ffc107;
-      margin: 10px 0;
-      border-radius: 5px;
-      transition: width 0.1s linear;
+      background-color: red;
+      width: 100%;
+      margin-bottom: 15px;
+      transition: width 1s linear;
+    }
+    #final {
+      font-size: 1.5em;
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
-  <h1>Trivial Pulp Fiction 🎬</h1>
-  <div id="trivial">Cargando...</div>
+  <div class="contenedor">
+    <h1>Trivial Pulp Fiction 🎬</h1>
+    <div id="trivial">Cargando...</div>
+  </div>
 
   <script>
     let preguntas = [];
     let usadas = [];
-    let preguntaActual = null;
-    let timer = null;
-    let tiempoMax = 5000; // 5 segundos
+    let puntuacion = 0;
+    let tiempoMaximo = 15;
+    let intervalo;
+    let tiempoRestante;
 
     async function cargarPreguntas() {
-      const res = await fetch("preguntas.json");
-      preguntas = await res.json();
-      siguientePregunta();
+      const response = await fetch('preguntas_pulp.json');
+      preguntas = await response.json();
+      mostrarNuevaPregunta();
     }
 
-    function siguientePregunta() {
+    function mostrarNuevaPregunta() {
       if (usadas.length === preguntas.length) {
-        document.getElementById("trivial").innerHTML = `<h2>Juego terminado</h2><p>¡Has respondido todas las preguntas!</p>`;
+        document.getElementById('trivial').innerHTML =
+          `<div id="final">🎉 ¡Has terminado!<br>✅ Puntuación: ${puntuacion}/${preguntas.length}</div>`;
         return;
       }
 
+      let index;
       do {
-        preguntaActual = preguntas[Math.floor(Math.random() * preguntas.length)];
-      } while (usadas.includes(preguntaActual));
+        index = Math.floor(Math.random() * preguntas.length);
+      } while (usadas.includes(index));
+      usadas.push(index);
 
-      usadas.push(preguntaActual);
-
-      mostrarPregunta(preguntaActual);
-    }
-
-    function mostrarPregunta(pregunta) {
+      const pregunta = preguntas[index];
       const div = document.getElementById("trivial");
-      let respuestasHtml = pregunta.respuestas.map((r, i) => `<button onclick="comprobarRespuesta('${r}')">${r}</button>`).join("");
+
+      const respuestasHtml = pregunta.respuestas.map(r =>
+        `<button onclick="comprobarRespuesta('${r}', '${pregunta.correcta}')">${r}</button>`).join("");
 
       div.innerHTML = `
         <div class="pregunta">${pregunta.pregunta}</div>
@@ -111,37 +103,31 @@
       iniciarTemporizador();
     }
 
-    function comprobarRespuesta(respuesta) {
-      detenerTemporizador();
-
+    function comprobarRespuesta(respuesta, correcta) {
+      clearInterval(intervalo);
       const resultado = document.getElementById("resultado");
-      if (respuesta === preguntaActual.correcta) {
-        resultado.innerHTML = "✅ ¡Correcto!";
+      if (respuesta === correcta) {
+        resultado.textContent = "✅ ¡Correcto!";
+        puntuacion++;
       } else {
-        resultado.innerHTML = `❌ Incorrecto. Era: ${preguntaActual.correcta}`;
+        resultado.textContent = `❌ Incorrecto. Era: ${correcta}`;
       }
-
-      setTimeout(siguientePregunta, 1500);
+      setTimeout(mostrarNuevaPregunta, 3000);
     }
 
     function iniciarTemporizador() {
+      tiempoRestante = tiempoMaximo;
       const barra = document.getElementById("barraTiempo");
-      let tiempoRestante = tiempoMax;
       barra.style.width = "100%";
-
-      timer = setInterval(() => {
-        tiempoRestante -= 100;
-        barra.style.width = `${(tiempoRestante / tiempoMax) * 100}%`;
-
+      intervalo = setInterval(() => {
+        tiempoRestante--;
+        barra.style.width = (tiempoRestante / tiempoMaximo * 100) + "%";
         if (tiempoRestante <= 0) {
-          clearInterval(timer);
-          comprobarRespuesta("Tiempo agotado");
+          clearInterval(intervalo);
+          document.getElementById("resultado").textContent = "⏰ Tiempo agotado.";
+          setTimeout(mostrarNuevaPregunta, 3000);
         }
-      }, 100);
-    }
-
-    function detenerTemporizador() {
-      clearInterval(timer);
+      }, 1000);
     }
 
     cargarPreguntas();
