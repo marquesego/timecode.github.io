@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trivia Pulp Fiction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #111;
+      color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    #question-container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: #222;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    img {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+    .answers button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+      background-color: #444;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .answers button:hover {
+      background-color: #666;
+    }
+    .bar-container {
+      width: 100%;
+      background-color: #555;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .bar {
+      height: 10px;
+      background-color: #00e676;
+      width: 100%;
+      border-radius: 5px;
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Trivia: Pulp Fiction</h1>
+  <div id="question-container">
+    <div id="image-container"><img id="question-image" src="" alt="Imagen de la pregunta" /></div>
+    <h2 id="question-text">Cargando pregunta...</h2>
+    <div class="answers" id="answers"></div>
+    <div class="bar-container">
+      <div class="bar" id="timer-bar"></div>
+    </div>
+  </div>
+
+  <script>
+    let questions = [];
+    let currentQuestion = 0;
+    let timerInterval;
+    const totalTime = 5; // segundos
+
+    const questionText = document.getElementById("question-text");
+    const questionImage = document.getElementById("question-image");
+    const answersDiv = document.getElementById("answers");
+    const timerBar = document.getElementById("timer-bar");
+
+    function startTrivia() {
+      if (questions.length > 0) {
+        showQuestion(currentQuestion);
+      } else {
+        questionText.textContent = "No se pudieron cargar preguntas.";
+      }
+    }
+
+    function showQuestion(index) {
+      clearInterval(timerInterval);
+      const q = questions[index];
+      questionText.textContent = q.question;
+      questionImage.src = q.image;
+      answersDiv.innerHTML = "";
+      q.answers.forEach(ans => {
+        const btn = document.createElement("button");
+        btn.textContent = ans.text;
+        btn.onclick = () => {
+          clearInterval(timerInterval);
+          nextQuestion();
+        };
+        answersDiv.appendChild(btn);
+      });
+      startTimer();
+    }
+
+    function startTimer() {
+      let timeLeft = totalTime;
+      timerBar.style.width = "100%";
+      timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        timerBar.style.width = `${(timeLeft / totalTime) * 100}%`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          nextQuestion();
+        }
+      }, 100);
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion(currentQuestion);
+      } else {
+        questionText.textContent = "¡Has terminado el trivia!";
+        questionImage.style.display = "none";
+        answersDiv.innerHTML = "";
+        timerBar.style.width = "0%";
+      }
+    }
+
+    // Cargar preguntas desde JSON externo
+    fetch("pulp_fiction_questions.json")
+      .then(res => res.json())
+      .then(data => {
+        questions = shuffleArray(data);
+        startTrivia();
+      })
+      .catch(err => {
+        questionText.textContent = "Error al cargar las preguntas.";
+        console.error(err);
+      });
+
+    // Función para mezclar preguntas (opcional)
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+[
+  {
+    "question": "¿Cómo llama Pumpkin a su novia durante el atraco en el restaurante?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Honey Bunny", "correct": true },
+      { "text": "Sweetie Pie", "correct": false },
+      { "text": "Baby Doll", "correct": false },
+      { "text": "Sugar Plum", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Cuál es el nombre del restaurante donde Vincent y Jules desayunan?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Hawthorne Grill", "correct": true },
+      { "text": "Jackrabbit Slim's", "correct": false },
+      { "text": "Big Kahuna Burger", "correct": false },
+      { "text": "Fat Moe's Diner", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué bebida pide Mia Wallace en Jackrabbit Slim's?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Batido de vainilla de $5", "correct": true },
+      { "text": "Café con leche", "correct": false },
+      { "text": "Refresco de cereza", "correct": false },
+      { "text": "Té helado", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué objeto recupera Butch del apartamento de su infancia?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Reloj de oro", "correct": true },
+      { "text": "Anillo de campeonato", "correct": false },
+      { "text": "Fotografía familiar", "correct": false },
+      { "text": "Medalla de guerra", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué canción suena durante el baile de Mia y Vincent?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "You Never Can Tell", "correct": true },
+      { "text": "Misirlou", "correct": false },
+      { "text": "Girl, You'll Be a Woman Soon", "correct": false },
+      { "text": "Son of a Preacher Man", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué tipo de droga consume Mia Wallace accidentalmente?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Heroína", "correct": true },
+      { "text": "Cocaína", "correct": false },
+      { "text": "Éxtasis", "correct": false },
+      { "text": "LSD", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Cómo se llama el personaje interpretado por Harvey Keitel?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Winston 'The Wolf' Wolfe", "correct": true },
+      { "text": "Captain Koons", "correct": false },
+      { "text": "Brett", "correct": false },
+      { "text": "Marcellus Wallace", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué objeto misterioso contiene el maletín brillante?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Nunca se revela", "correct": true },
+      { "text": "Diamantes", "correct": false },
+      { "text": "Dinero en efectivo", "correct": false },
+      { "text": "Documentos secretos", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué personaje cita pasajes bíblicos antes de ejecutar a alguien?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Jules Winnfield", "correct": true },
+      { "text": "Vincent Vega", "correct": false },
+      { "text": "Butch Coolidge", "correct": false },
+      { "text": "Marsellus Wallace", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué tipo de coche conduce Vincent Vega?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Chevrolet Malibu 1964", "correct": true },
+      { "text": "Ford Mustang 1965", "correct": false },
+      { "text": "Dodge Charger 1969", "correct": false },
+      { "text": "Pontiac GTO 1967", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Quién interpreta al boxeador Butch Coolidge?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Bruce Willis", "correct": true },
+      { "text": "John Travolta", "correct": false },
+      { "text": "Samuel L. Jackson", "correct": false },
+      { "text": "Tim Roth", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué objeto utiliza Mia Wallace para inhalar accidentalmente heroína?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Un tubo de cocaína", "correct": true },
+      { "text": "Una pajilla", "correct": false },
+      { "text": "Un billete enrollado", "correct": false },
+      { "text": "Una jeringa", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué personaje es conocido por su habilidad para 'resolver problemas'?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Winston 'The Wolf' Wolfe", "correct": true },
+      { "text": "Jules Winnfield", "correct": false },
+      { "text": "Vincent Vega", "correct": false },
+      { "text": "Lance", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué objeto se encuentra en la parte trasera del coche cuando Vincent y Jules recogen a Marvin?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Un cuerpo ensangrentado", "correct": true },
+      { "text": "Una maleta", "correct": false },
+      { "text": "Una bicicleta", "correct": false },
+      { "text": "Un perro", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué instrumento musical se escucha en la escena inicial de la película?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Guitarra eléctrica", "correct": true },
+      { "text": "Saxofón", "correct": false },
+      { "text": "Piano", "correct": false },
+      { "text": "Batería", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué actor interpreta a Lance, el traficante de drogas?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Eric Stoltz", "correct": true },
+      { "text": "Tim Roth", "correct": false },
+      { "text": "Steve Buscemi", "correct": false },
+      { "text": "Harvey Keitel", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué personaje es el jefe de Vincent y Jules?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Marsellus Wallace", "correct": true },
+      { "text": "Butch Coolidge", "correct": false },
+      { "text": "Captain Koons", "correct": false },
+      { "text": "Winston Wolfe", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué objeto utiliza Vincent para revivir a Mia después de su sobredosis?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer/rm1959548928/",
+    "answers": [
+      { "text": "Una inyección de adrenalina", "correct": true },
+      { "text": "Un desfibrilador", "correct": false },
+      { "text": "Agua fría", "correct": false },
+      { "text": "Respiración boca a boca", "correct": false }
+    ]
+  },
+  {
+    "question": "¿Qué personaje es interpretado por Quentin Tarantino?",
+    "image": "https://www.imdb.com/title/tt0110912/mediaviewer
+::contentReference[oaicite:0]{index=0}
+ 
