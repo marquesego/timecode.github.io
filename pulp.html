@@ -3,100 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trivial Pulp Fiction</title>
+  <title>Trivial Pulp Fiction 🎬</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #1c1c1c;
-      color: #fff;
+      font-family: sans-serif;
+      background-color: #1c1c1c;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #e50914;
+    }
+    #pregunta {
+      font-size: 1.5rem;
+      margin: 1rem 0;
       text-align: center;
-      padding: 20px;
     }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #2a2a2a;
-      padding: 20px;
-      border-radius: 8px;
-    }
-
-    img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-
-    .question {
-      font-size: 1.3em;
-      margin-bottom: 15px;
-    }
-
-    .answers button {
-      display: block;
+    .respuestas {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 400px;
       width: 100%;
-      margin: 5px 0;
-      padding: 10px;
-      font-size: 1em;
-      background: #444;
+    }
+    .respuestas button {
+      background-color: #333;
       color: white;
-      border: none;
-      border-radius: 5px;
+      border: 1px solid #555;
+      padding: 1rem;
       cursor: pointer;
-    }
-
-    .answers button:hover {
-      background: #666;
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: red;
-      width: 100%;
-      margin-bottom: 20px;
       border-radius: 5px;
-      animation: progress 5s linear forwards;
+      transition: 0.3s;
     }
-
-    @keyframes progress {
-      from { width: 100%; }
-      to { width: 0%; }
+    .respuestas button:hover {
+      background-color: #555;
     }
-
-    .result {
-      font-size: 1.2em;
-      margin-top: 20px;
+    #progreso {
+      width: 100%;
+      height: 10px;
+      background: #444;
+      margin-top: 1rem;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    #barraTiempo {
+      height: 100%;
+      background: #e50914;
+      width: 100%;
+      transition: width 0.1s linear;
+    }
+    #resultado {
+      margin-top: 2rem;
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Trivial Pulp Fiction 🎬</h1>
-    <div id="game">
-      <div class="progress-bar" id="progress"></div>
-      <img id="image" src="" alt="" style="display:none;" />
-      <div class="question" id="question">Cargando...</div>
-      <div class="answers" id="answers"></div>
-    </div>
-    <div class="result" id="result"></div>
+  <h1>Trivial Pulp Fiction 🎬</h1>
+  <div id="pregunta">Cargando...</div>
+  <div class="respuestas" id="respuestas"></div>
+  <div id="progreso">
+    <div id="barraTiempo"></div>
   </div>
+  <div id="resultado"></div>
 
   <script>
     let preguntas = [];
     let preguntaActual = 0;
-    let score = 0;
-    let tiempo;
     let usadas = [];
+    let tiempoTotal = 5; // segundos
+    let tiempoRestante;
+    let intervalo;
 
-    function cargarPregunta() {
-      clearTimeout(tiempo);
-      document.getElementById("progress").style.animation = "none";
-      void document.getElementById("progress").offsetWidth; // reinicia animación
-      document.getElementById("progress").style.animation = "progress 5s linear forwards";
+    async function cargarPreguntas() {
+      const res = await fetch('pulp_fiction_questions.json');
+      preguntas = await res.json();
+      usadas = [];
+      mostrarPregunta();
+    }
 
+    function mostrarPregunta() {
+      clearInterval(intervalo);
       if (usadas.length === preguntas.length) {
-        document.getElementById("game").style.display = "none";
-        document.getElementById("result").innerText = `Juego terminado. Aciertos: ${score}/${preguntas.length}`;
+        document.getElementById("pregunta").textContent = "¡Has respondido todas las preguntas!";
+        document.getElementById("respuestas").innerHTML = "";
+        document.getElementById("progreso").style.display = "none";
         return;
       }
 
@@ -104,41 +98,58 @@
       do {
         index = Math.floor(Math.random() * preguntas.length);
       } while (usadas.includes(index));
-
       usadas.push(index);
-      const pregunta = preguntas[index];
-      const contenedorPregunta = document.getElementById("question");
-      const contenedorRespuestas = document.getElementById("answers");
-      const imagen = document.getElementById("image");
 
-      contenedorPregunta.textContent = pregunta.pregunta;
-      imagen.style.display = pregunta.imagen ? 'block' : 'none';
-      imagen.src = pregunta.imagen || '';
-      contenedorRespuestas.innerHTML = "";
-
-      pregunta.respuestas.forEach(respuesta => {
+      const q = preguntas[index];
+      document.getElementById("pregunta").textContent = q.pregunta;
+      const contenedor = document.getElementById("respuestas");
+      contenedor.innerHTML = "";
+      q.respuestas.forEach(respuesta => {
         const btn = document.createElement("button");
         btn.textContent = respuesta;
-        btn.onclick = () => {
-          if (respuesta === pregunta.correcta) {
-            score++;
-          }
-          cargarPregunta();
-        };
-        contenedorRespuestas.appendChild(btn);
+        btn.onclick = () => comprobarRespuesta(respuesta, q.correcta);
+        contenedor.appendChild(btn);
       });
 
-      tiempo = setTimeout(() => {
-        cargarPregunta();
-      }, 5000);
+      iniciarTemporizador();
     }
 
-    fetch('pulp_fiction_questions.json')
-      .then(res => res.json())
-      .then(data => {
-        preguntas = data;
-        cargarPregunta();
-      });
+    function comprobarRespuesta(respuesta, correcta) {
+      clearInterval(intervalo);
+      if (respuesta === correcta) {
+        document.getElementById("resultado").textContent = "✅ ¡Correcto!";
+      } else {
+        document.getElementById("resultado").textContent = "❌ Incorrecto. Era: " + correcta;
+      }
+      setTimeout(() => {
+        document.getElementById("resultado").textContent = "";
+        mostrarPregunta();
+      }, 2000);
+    }
+
+    function iniciarTemporizador() {
+      tiempoRestante = tiempoTotal;
+      actualizarBarra();
+      intervalo = setInterval(() => {
+        tiempoRestante -= 0.1;
+        actualizarBarra();
+        if (tiempoRestante <= 0) {
+          clearInterval(intervalo);
+          document.getElementById("resultado").textContent = "⏱️ ¡Tiempo agotado!";
+          setTimeout(() => {
+            document.getElementById("resultado").textContent = "";
+            mostrarPregunta();
+          }, 2000);
+        }
+      }, 100);
+    }
+
+    function actualizarBarra() {
+      const porcentaje = (tiempoRestante / tiempoTotal) * 100;
+      document.getElementById("barraTiempo").style.width = `${porcentaje}%`;
+    }
+
+    cargarPreguntas();
   </script>
 </body>
 </html>
