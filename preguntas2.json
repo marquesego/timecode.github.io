@@ -1,58 +1,102 @@
 [
   {
-    "question": "¿Qué contiene el misterioso maletín?",
-    "image": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/Pulp_Fiction_mallet.jpg/440px-Pulp_Fiction_mallet.jpg",
-    "answers": [
-      { "text": "Oro", "correct": false },
-      { "text": "El alma de Marsellus Wallace", "correct": true },
-      { "text": "Un diamante", "correct": false },
-      { "text": "No se sabe", "correct": false }
-    ]
+    "pregunta": "¿Qué personaje interpreta John Travolta?",
+    "respuestas": ["Vincent Vega", "Jules Winnfield", "Butch Coolidge", "Marsellus Wallace"],
+    "correcta": "Vincent Vega"
   },
   {
-    "question": "¿Quién interpreta a Vincent Vega?",
-    "image": "https://upload.wikimedia.org/wikipedia/en/8/82/Vincent_Vega.jpg",
-    "answers": [
-      { "text": "Bruce Willis", "correct": false },
-      { "text": "John Travolta", "correct": true },
-      { "text": "Samuel L. Jackson", "correct": false },
-      { "text": "Tim Roth", "correct": false }
-    ]
+    "pregunta": "¿Qué personaje cita pasajes de la Biblia antes de matar a alguien?",
+    "respuestas": ["Vincent Vega", "Jules Winnfield", "The Wolf", "Butch Coolidge"],
+    "correcta": "Jules Winnfield"
   },
   {
-    "question": "¿Qué bailan Vincent y Mia en el restaurante?",
-    "image": "https://media.gq.com/photos/5e3ac6f03f34ae00089e3c79/16:9/w_2560%2Cc_limit/pulp-fiction-dance.jpg",
-    "answers": [
-      { "text": "Charleston", "correct": false },
-      { "text": "Twist", "correct": true },
-      { "text": "Rock and roll", "correct": false },
-      { "text": "Tango", "correct": false }
-    ]
+    "pregunta": "¿Cómo se llama la esposa de Marsellus Wallace?",
+    "respuestas": ["Fabienne", "Lola", "Mia", "Marcelline"],
+    "correcta": "Mia"
   },
   {
-    "question": "¿Cómo se llama la esposa de Marsellus Wallace?",
-    "image": "https://upload.wikimedia.org/wikipedia/en/3/36/Mia_Wallace.jpg",
-    "answers": [
-      { "text": "Mia", "correct": true },
-      { "text": "Jody", "correct": false },
-      { "text": "Trudi", "correct": false },
-      { "text": "Marcelline", "correct": false }
-    ]
+    "pregunta": "¿Qué droga consume accidentalmente Mia Wallace?",
+    "respuestas": ["Cocaína", "Heroína", "Éxtasis", "LSD"],
+    "correcta": "Heroína"
   },
   {
-    "question": "¿Qué droga consume Mia accidentalmente?",
-    "image": "https://i.ytimg.com/vi/5D1KPyPKVAo/maxresdefault.jpg",
-    "answers": [
-      { "text": "Marihuana", "correct": false },
-      { "text": "Cocaína", "correct": false },
-      { "text": "Heroína", "correct": true },
-      { "text": "Éxtasis", "correct": false }
-    ]
+    "pregunta": "¿Qué ocurre justo después de que Vincent inyecta a Mia con adrenalina?",
+    "respuestas": ["Mia vomita", "Mia despierta de golpe", "Mia se desmaya", "Mia se va al hospital"],
+    "correcta": "Mia despierta de golpe"
   },
   {
-    "question": "¿Qué hace Jules antes de matar a alguien?",
-    "image": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/Jules_Winnfield.jpg/440px-Jules_Winnfield.jpg",
-    "answers": [
-      { "text": "Canta una canción", "correct": false },
-      { "text": "Reza un pasaje bíblico", "correct": true },
-      { "text
+    "pregunta": "¿Cuál es el nombre del personaje interpretado por Bruce Willis?",
+    "respuestas": ["Zed", "The Gimp", "Butch Coolidge", "Brett"],
+    "correcta": "Butch Coolidge"
+  },
+  {
+    "pregunta": "¿A qué se dedica el personaje de Butch Coolidge?",
+    "respuestas": ["Ladrón", "Boxeador", "Matón a sueldo", "Camello"],
+    "correcta": "Boxeador"
+  },
+  {
+    "pregunta": "¿Qué objeto busca desesperadamente Butch en su apartamento?",
+    "respuestas": ["Dinero", "Reloj de oro", "Pistola", "Pasaporte"],
+    "correcta": "Reloj de oro"
+  },
+  {
+    "pregunta": "¿Qué le sucede a Vincent Vega en la historia de Butch?",
+    "respuestas": ["Escapa", "Mata a Butch", "Es asesinado", "Se droga"],
+    "correcta": "Es asesinado"
+  },
+  {
+    "pregunta": "¿Qué hace el personaje de Winston Wolf?",
+    "respuestas": ["Mata gente", "Limpia escenas del crimen", "Cocina drogas", "Recoge cadáveres"],
+    "correcta": "Limpia escenas del crimen"
+  },
+  {
+    "pregunta": "¿Cómo se llama el personaje interpretado por Quentin Tarantino?",
+    "respuestas": ["Brett", "Jimmy", "Marvin", "Zed"],
+    "correcta": "Jimmy"
+  },
+  {
+    "pregunta": "¿Qué famosa cadena de comida ficticia aparece en la película?",
+    "respuestas": ["Big Kahuna Burger", "Jackrabbit Slim's", "Los Pollos Hermanos", "Burger Shot"],
+    "correcta": "Big Kahuna Burger"
+  },
+  {
+    "pregunta": "¿Dónde tienen lugar los famosos bailes de Vincent y Mia?",
+    "respuestas": ["En casa de Mia", "En el bar de Marsellus", "En Jackrabbit Slim's", "En el club 5th Element"],
+    "correcta": "En Jackrabbit Slim's"
+  },
+  {
+    "pregunta": "¿Qué ocurre con Marvin en el coche?",
+    "respuestas": ["Se escapa", "Dispara a Jules", "Es asesinado por accidente", "Se duerme"],
+    "correcta": "Es asesinado por accidente"
+  },
+  {
+    "pregunta": "¿Qué color tiene la cartera de Jules?",
+    "respuestas": ["Negra", "Roja", "Beige", "Marrón"],
+    "correcta": "Marrón"
+  },
+  {
+    "pregunta": "¿Qué pone en la cartera de Jules?",
+    "respuestas": ["I'm the boss", "Bad Motherfucker", "King of Cool", "Don't Touch"],
+    "correcta": "Bad Motherfucker"
+  },
+  {
+    "pregunta": "¿Qué comida pide Jules antes de disparar a Brett?",
+    "respuestas": ["Tarta de manzana", "Hamburguesa con queso", "Sándwich de atún", "Pollo frito"],
+    "correcta": "Hamburguesa con queso"
+  },
+  {
+    "pregunta": "¿Qué bebida acompaña la hamburguesa en esa escena?",
+    "respuestas": ["Agua", "Cerveza", "Sprite", "Un batido"],
+    "correcta": "Sprite"
+  },
+  {
+    "pregunta": "¿Qué le sucede a Zed?",
+    "respuestas": ["Muere", "Es arrestado", "Escapa", "Es torturado"],
+    "correcta": "Es torturado"
+  },
+  {
+    "pregunta": "¿Qué objeto brilla misteriosamente en el maletín?",
+    "respuestas": ["Una espada", "Un lingote de oro", "No se muestra", "Un diamante"],
+    "correcta": "No se muestra"
+  }
+]
