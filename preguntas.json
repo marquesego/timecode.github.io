@@ -1,422 +1,102 @@
 [
   {
-    "question": "¿Qué tipo de arroz se usa tradicionalmente en la paella valenciana?",
-    "answers": [
-      {
-        "text": "Arborio",
-        "correct": false
-      },
-      {
-        "text": "Basmati",
-        "correct": false
-      },
-      {
-        "text": "Redondo",
-        "correct": true
-      },
-      {
-        "text": "Integral",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué personaje interpreta John Travolta?",
+    "respuestas": ["Vincent Vega", "Jules Winnfield", "Butch Coolidge", "Marsellus Wallace"],
+    "correcta": "Vincent Vega"
   },
   {
-    "question": "¿Cuál es el principal ingrediente del gazpacho?",
-    "answers": [
-      {
-        "text": "Pepino",
-        "correct": false
-      },
-      {
-        "text": "Pimiento",
-        "correct": false
-      },
-      {
-        "text": "Tomate",
-        "correct": true
-      },
-      {
-        "text": "Ajo",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué personaje cita pasajes de la Biblia antes de matar a alguien?",
+    "respuestas": ["Vincent Vega", "Jules Winnfield", "The Wolf", "Butch Coolidge"],
+    "correcta": "Jules Winnfield"
   },
   {
-    "question": "¿Qué fruta es la base del guacamole?",
-    "answers": [
-      {
-        "text": "Tomate",
-        "correct": false
-      },
-      {
-        "text": "Aguacate",
-        "correct": true
-      },
-      {
-        "text": "Pepino",
-        "correct": false
-      },
-      {
-        "text": "Pimiento",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Cómo se llama la esposa de Marsellus Wallace?",
+    "respuestas": ["Fabienne", "Lola", "Mia", "Marcelline"],
+    "correcta": "Mia"
   },
   {
-    "question": "¿Cuál es el ingrediente principal de una bechamel?",
-    "answers": [
-      {
-        "text": "Harina",
-        "correct": false
-      },
-      {
-        "text": "Leche",
-        "correct": true
-      },
-      {
-        "text": "Mantequilla",
-        "correct": false
-      },
-      {
-        "text": "Huevo",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué droga consume accidentalmente Mia Wallace?",
+    "respuestas": ["Cocaína", "Heroína", "Éxtasis", "LSD"],
+    "correcta": "Heroína"
   },
   {
-    "question": "¿Qué pescado es típico en el bacalao al pil-pil?",
-    "answers": [
-      {
-        "text": "Merluza",
-        "correct": false
-      },
-      {
-        "text": "Salmón",
-        "correct": false
-      },
-      {
-        "text": "Bacalao",
-        "correct": true
-      },
-      {
-        "text": "Lubina",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué ocurre justo después de que Vincent inyecta a Mia con adrenalina?",
+    "respuestas": ["Mia vomita", "Mia despierta de golpe", "Mia se desmaya", "Mia se va al hospital"],
+    "correcta": "Mia despierta de golpe"
   },
   {
-    "question": "¿Qué parte del cerdo se utiliza para el jamón ibérico?",
-    "answers": [
-      {
-        "text": "Paleta",
-        "correct": false
-      },
-      {
-        "text": "Costillar",
-        "correct": false
-      },
-      {
-        "text": "Pata trasera",
-        "correct": true
-      },
-      {
-        "text": "Lomo",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Cuál es el nombre del personaje interpretado por Bruce Willis?",
+    "respuestas": ["Zed", "The Gimp", "Butch Coolidge", "Brett"],
+    "correcta": "Butch Coolidge"
   },
   {
-    "question": "¿Cuál es el ingrediente base del hummus?",
-    "answers": [
-      {
-        "text": "Lentejas",
-        "correct": false
-      },
-      {
-        "text": "Garbanzos",
-        "correct": true
-      },
-      {
-        "text": "Judías",
-        "correct": false
-      },
-      {
-        "text": "Trigo",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿A qué se dedica el personaje de Butch Coolidge?",
+    "respuestas": ["Ladrón", "Boxeador", "Matón a sueldo", "Camello"],
+    "correcta": "Boxeador"
   },
   {
-    "question": "¿Qué es el miso?",
-    "answers": [
-      {
-        "text": "Una sopa de pescado",
-        "correct": false
-      },
-      {
-        "text": "Una pasta fermentada de soja",
-        "correct": true
-      },
-      {
-        "text": "Un tipo de alga",
-        "correct": false
-      },
-      {
-        "text": "Un arroz glutinoso",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué objeto busca desesperadamente Butch en su apartamento?",
+    "respuestas": ["Dinero", "Reloj de oro", "Pistola", "Pasaporte"],
+    "correcta": "Reloj de oro"
   },
   {
-    "question": "¿Qué ingrediente da color al risotto a la milanesa?",
-    "answers": [
-      {
-        "text": "Cúrcuma",
-        "correct": false
-      },
-      {
-        "text": "Azafrán",
-        "correct": true
-      },
-      {
-        "text": "Pimentón",
-        "correct": false
-      },
-      {
-        "text": "Curry",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué le sucede a Vincent Vega en la historia de Butch?",
+    "respuestas": ["Escapa", "Mata a Butch", "Es asesinado", "Se droga"],
+    "correcta": "Es asesinado"
   },
   {
-    "question": "¿Cuál es el nombre del pan plano típico de la India?",
-    "answers": [
-      {
-        "text": "Pita",
-        "correct": false
-      },
-      {
-        "text": "Tortilla",
-        "correct": false
-      },
-      {
-        "text": "Naan",
-        "correct": true
-      },
-      {
-        "text": "Chapati",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué hace el personaje de Winston Wolf?",
+    "respuestas": ["Mata gente", "Limpia escenas del crimen", "Cocina drogas", "Recoge cadáveres"],
+    "correcta": "Limpia escenas del crimen"
   },
   {
-    "question": "¿Qué marisco es típico en la zarzuela de mariscos?",
-    "answers": [
-      {
-        "text": "Langostinos",
-        "correct": true
-      },
-      {
-        "text": "Salmón",
-        "correct": false
-      },
-      {
-        "text": "Bacalao",
-        "correct": false
-      },
-      {
-        "text": "Trucha",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Cómo se llama el personaje interpretado por Quentin Tarantino?",
+    "respuestas": ["Brett", "Jimmy", "Marvin", "Zed"],
+    "correcta": "Jimmy"
   },
   {
-    "question": "¿Qué bebida se utiliza en la receta del tiramisú tradicional?",
-    "answers": [
-      {
-        "text": "Café",
-        "correct": true
-      },
-      {
-        "text": "Té negro",
-        "correct": false
-      },
-      {
-        "text": "Vino tinto",
-        "correct": false
-      },
-      {
-        "text": "Ron",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué famosa cadena de comida ficticia aparece en la película?",
+    "respuestas": ["Big Kahuna Burger", "Jackrabbit Slim's", "Los Pollos Hermanos", "Burger Shot"],
+    "correcta": "Big Kahuna Burger"
   },
   {
-    "question": "¿Cuál de estos ingredientes no es un queso?",
-    "answers": [
-      {
-        "text": "Roquefort",
-        "correct": false
-      },
-      {
-        "text": "Mascarpone",
-        "correct": false
-      },
-      {
-        "text": "Prosciutto",
-        "correct": true
-      },
-      {
-        "text": "Gorgonzola",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Dónde tienen lugar los famosos bailes de Vincent y Mia?",
+    "respuestas": ["En casa de Mia", "En el bar de Marsellus", "En Jackrabbit Slim's", "En el club 5th Element"],
+    "correcta": "En Jackrabbit Slim's"
   },
   {
-    "question": "¿Qué tipo de cocción es ‘pochado’?",
-    "answers": [
-      {
-        "text": "Al horno",
-        "correct": false
-      },
-      {
-        "text": "En aceite a baja temperatura",
-        "correct": true
-      },
-      {
-        "text": "Al vapor",
-        "correct": false
-      },
-      {
-        "text": "A la plancha",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué ocurre con Marvin en el coche?",
+    "respuestas": ["Se escapa", "Dispara a Jules", "Es asesinado por accidente", "Se duerme"],
+    "correcta": "Es asesinado por accidente"
   },
   {
-    "question": "¿Qué tipo de grasa se utiliza en la cocina confitada tradicional francesa?",
-    "answers": [
-      {
-        "text": "Aceite de oliva",
-        "correct": false
-      },
-      {
-        "text": "Mantequilla",
-        "correct": false
-      },
-      {
-        "text": "Grasa de pato",
-        "correct": true
-      },
-      {
-        "text": "Sebo",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué color tiene la cartera de Jules?",
+    "respuestas": ["Negra", "Roja", "Beige", "Marrón"],
+    "correcta": "Marrón"
   },
   {
-    "question": "¿Qué condimento contiene vinagre, aceite y mostaza?",
-    "answers": [
-      {
-        "text": "Alioli",
-        "correct": false
-      },
-      {
-        "text": "Vinagreta",
-        "correct": true
-      },
-      {
-        "text": "Pesto",
-        "correct": false
-      },
-      {
-        "text": "Salsa César",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué pone en la cartera de Jules?",
+    "respuestas": ["I'm the boss", "Bad Motherfucker", "King of Cool", "Don't Touch"],
+    "correcta": "Bad Motherfucker"
   },
   {
-    "question": "¿Cuál es el nombre de la técnica japonesa de empanar y freír?",
-    "answers": [
-      {
-        "text": "Yakitori",
-        "correct": false
-      },
-      {
-        "text": "Tempura",
-        "correct": true
-      },
-      {
-        "text": "Sashimi",
-        "correct": false
-      },
-      {
-        "text": "Teriyaki",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué comida pide Jules antes de disparar a Brett?",
+    "respuestas": ["Tarta de manzana", "Hamburguesa con queso", "Sándwich de atún", "Pollo frito"],
+    "correcta": "Hamburguesa con queso"
   },
   {
-    "question": "¿Qué tipo de corte es el ‘juliana’?",
-    "answers": [
-      {
-        "text": "En rodajas gruesas",
-        "correct": false
-      },
-      {
-        "text": "En tiras finas",
-        "correct": true
-      },
-      {
-        "text": "En cubos",
-        "correct": false
-      },
-      {
-        "text": "En dados grandes",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué bebida acompaña la hamburguesa en esa escena?",
+    "respuestas": ["Agua", "Cerveza", "Sprite", "Un batido"],
+    "correcta": "Sprite"
   },
   {
-    "question": "¿Qué ingrediente da nombre a la salsa carbonara tradicional?",
-    "answers": [
-      {
-        "text": "Queso",
-        "correct": false
-      },
-      {
-        "text": "Carbón",
-        "correct": true
-      },
-      {
-        "text": "Pimienta",
-        "correct": false
-      },
-      {
-        "text": "Nata",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué le sucede a Zed?",
+    "respuestas": ["Muere", "Es arrestado", "Escapa", "Es torturado"],
+    "correcta": "Es torturado"
   },
   {
-    "question": "¿Qué pescado se usa en el sushi?",
-    "answers": [
-      {
-        "text": "Trucha",
-        "correct": false
-      },
-      {
-        "text": "Salmón",
-        "correct": true
-      },
-      {
-        "text": "Lubina",
-        "correct": false
-      },
-      {
-        "text": "Perca",
-        "correct": false
-      }
-    ]
+    "pregunta": "¿Qué objeto brilla misteriosamente en el maletín?",
+    "respuestas": ["Una espada", "Un lingote de oro", "No se muestra", "Un diamante"],
+    "correcta": "No se muestra"
   }
 ]
