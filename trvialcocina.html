@@ -53,7 +53,7 @@
     let timerInterval;
 
     async function loadQuestions() {
-      const res = await fetch('preguntas.json');
+      const res = await fetch('preguntascocina.json');
       questions = await res.json();
       shuffle(questions);
       showQuestion();
