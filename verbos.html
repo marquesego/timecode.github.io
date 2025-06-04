@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verbos Irregulares</title>
+    <style>
+        /* style.css integrado */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            box-sizing: border-box; /* Asegura que el padding no desborde el ancho */
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        #pregunta-container {
+            background-color: #e8f0fe;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 5px solid #3498db;
+        }
+
+        .pregunta {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #3498db;
+            margin: 10px 0;
+        }
+
+        .tipo-pregunta {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .campos-respuestas label {
+            display: block;
+            text-align: left;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #4a4a4a;
+        }
+
+        .campos-respuestas input[type="text"] {
+            width: calc(100% - 20px); /* Resta el padding */
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1.1em;
+            box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+        }
+
+        .campos-respuestas input[type="text"]:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            border-color: #ced4da;
+        }
+
+        button {
+            background-color: #28a745; /* Color verde para comprobar */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 15px 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button#siguienteBtn {
+            background-color: #007bff; /* Color azul para siguiente */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        #feedback p {
+            margin: 5px 0;
+        }
+
+        /* Clases para feedback visual de inputs */
+        .correcto {
+            border-color: #28a745 !important;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .incorrecto {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Practica de Verbos Irregulares</h1>
+        <div id="pregunta-container">
+            <p>Completa las formas del verbo:</p>
+            <p class="pregunta" id="pregunta-valor"></p>
+            <p class="tipo-pregunta" id="tipo-pregunta"></p>
+        </div>
+
+        <div class="campos-respuestas">
+            <label for="infinitivo">Infinitivo:</label>
+            <input type="text" id="infinitivo">
+
+            <label for="pasadoSimple">Pasado Simple:</label>
+            <input type="text" id="pasadoSimple">
+
+            <label for="participio">Participio:</label>
+            <input type="text" id="participio">
+
+            <label for="espanol">Español:</label>
+            <input type="text" id="espanol">
+        </div>
+
+        <button id="comprobarBtn">Comprobar</button>
+        <button id="siguienteBtn" style="display: none;">Siguiente Verbo</button>
+
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        // script.js integrado
+       const verbosIrregulares = [
+    { infinitivo: "be", pasadoSimple: "was/were", participio: "been", espanol: "ser/estar" },
+    { infinitivo: "begin", pasadoSimple: "began", participio: "begun", espanol: "empezar" },
+    { infinitivo: "break", pasadoSimple: "broke", participio: "broken", espanol: "romper" },
+    { infinitivo: "bring", pasadoSimple: "brought", participio: "brought", espanol: "traer" },
+    { infinitivo: "build", pasadoSimple: "built", participio: "built", espanol: "construir" },
+    { infinitivo: "buy", pasadoSimple: "bought", participio: "bought", espanol: "comprar" },
+    { infinitivo: "catch", pasadoSimple: "caught", participio: "caught", espanol: "coger/atrapar" },
+    { infinitivo: "choose", pasadoSimple: "chose", participio: "chosen", espanol: "elegir" },
+    { infinitivo: "come", pasadoSimple: "came", participio: "come", espanol: "venir" },
+    { infinitivo: "cost", pasadoSimple: "cost", participio: "cost", espanol: "costar" },
+    { infinitivo: "cut", pasadoSimple: "cut", participio: "cut", espanol: "cortar" },
+    { infinitivo: "do", pasadoSimple: "did", participio: "done", espanol: "hacer" },
+    { infinitivo: "draw", pasadoSimple: "drew", participio: "drawn", espanol: "dibujar" },
+    { infinitivo: "dream", pasadoSimple: "dreamed/dreamt", participio: "dreamed/dreamt", espanol: "soñar" },
+    { infinitivo: "drink", pasadoSimple: "drank", participio: "drunk", espanol: "beber" },
+    { infinitivo: "drive", pasadoSimple: "drove", participio: "driven", espanol: "conducir" },
+    { infinitivo: "eat", pasadoSimple: "ate", participio: "eaten", espanol: "comer" },
+    { infinitivo: "fall", pasadoSimple: "fell", participio: "fallen", espanol: "caer" },
+    { infinitivo: "feed", pasadoSimple: "fed", participio: "fed", espanol: "alimentar" },
+    { infinitivo: "feel", pasadoSimple: "felt", participio: "felt", espanol: "sentir" },
+    { infinitivo: "fight", pasadoSimple: "fought", participio: "fought", espanol: "luchar" },
+    { infinitivo: "find", pasadoSimple: "found", participio: "found", espanol: "encontrar" },
+    { infinitivo: "fly", pasadoSimple: "flew", participio: "flown", espanol: "volar" },
+    { infinitivo: "forget", pasadoSimple: "forgot", participio: "forgotten", espanol: "olvidar" },
+    { infinitivo: "get", pasadoSimple: "got", participio: "got/gotten", espanol: "obtener/conseguir" },
+    { infinitivo: "give", pasadoSimple: "gave", participio: "given", espanol: "dar" },
+    { infinitivo: "go", pasadoSimple: "went", participio: "gone", espanol: "ir" },
+    { infinitivo: "grow", pasadoSimple: "grew", participio: "grown", espanol: "crecer" },
+    { infinitivo: "have", pasadoSimple: "had", participio: "had", espanol: "tener" },
+    { infinitivo: "hear", pasadoSimple: "heard", participio: "heard", espanol: "oír" },
+    { infinitivo: "hide", pasadoSimple: "hid", participio: "hidden", espanol: "esconder" },
+    { infinitivo: "hit", pasadoSimple: "hit", participio: "hit", espanol: "golpear" },
+    { infinitivo: "hold", pasadoSimple: "held", participio: "held", espanol: "sujetar" },
+    { infinitivo: "hurt", pasadoSimple: "hurt", participio: "hurt", espanol: "herir/doler" },
+    { infinitivo: "keep", pasadoSimple: "kept", participio: "kept", espanol: "guardar" },
+    { infinitivo: "know", pasadoSimple: "knew", participio: "known", espanol: "saber/conocer" },
+    { infinitivo: "lead", pasadoSimple: "led", participio: "led", espanol: "liderar" },
+    { infinitivo: "leave", pasadoSimple: "left", participio: "left", espanol: "dejar/salir" },
+    { infinitivo: "lend", pasadoSimple: "lent", participio: "lent", espanol: "prestar" },
+    { infinitivo: "let", pasadoSimple: "let", participio: "let", espanol: "permitir/dejar" },
+    { infinitivo: "lie", pasadoSimple: "lay", participio: "lain", espanol: "tumbarse" },
+    { infinitivo: "lose", pasadoSimple: "lost", participio: "lost", espanol: "perder" },
+    { infinitivo: "make", pasadoSimple: "made", participio: "made", espanol: "hacer/fabricar" },
+    { infinitivo: "mean", pasadoSimple: "meant", participio: "meant", espanol: "significar" },
+    { infinitivo: "meet", pasadoSimple: "met", participio: "met", espanol: "encontrarse" },
+    { infinitivo: "pay", pasadoSimple: "paid", participio: "paid", espanol: "pagar" },
+    { infinitivo: "put", pasadoSimple: "put", participio: "put", espanol: "poner" },
+    { infinitivo: "read", pasadoSimple: "read", participio: "read", espanol: "leer" },
+    { infinitivo: "ride", pasadoSimple: "rode", participio: "ridden", espanol: "montar" },
+    { infinitivo: "ring", pasadoSimple: "rang", participio: "rung", espanol: "llamar/sonar" },
+    { infinitivo: "rise", pasadoSimple: "rose", participio: "risen", espanol: "levantarse/subir" },
+    { infinitivo: "run", pasadoSimple: "ran", participio: "run", espanol: "correr" },
+    { infinitivo: "say", pasadoSimple: "said", participio: "said", espanol: "decir" },
+    { infinitivo: "see", pasadoSimple: "saw", participio: "seen", espanol: "ver" },
+    { infinitivo: "sell", pasadoSimple: "sold", participio: "sold", espanol: "vender" },
+    { infinitivo: "send", pasadoSimple: "sent", participio: "sent", espanol: "enviar" },
+    { infinitivo: "shine", pasadoSimple: "shone/shined", participio: "shone/shined", espanol: "brillar" },
+    { infinitivo: "shoot", pasadoSimple: "shot", participio: "shot", espanol: "disparar" },
+    { infinitivo: "show", pasadoSimple: "showed", participio: "shown", espanol: "mostrar" },
+    { infinitivo: "shut", pasadoSimple: "shut", participio: "shut", espanol: "cerrar" },
+    { infinitivo: "sing", pasadoSimple: "sang", participio: "sung", espanol: "cantar" },
+    { infinitivo: "sit", pasadoSimple: "sat", participio: "sat", espanol: "sentarse" },
+    { infinitivo: "sleep", pasadoSimple: "slept", participio: "slept", espanol: "dormir" },
+    { infinitivo: "speak", pasadoSimple: "spoke", participio: "spoken", espanol: "hablar" },
+    { infinitivo: "spend", pasadoSimple: "spent", participio: "spent", espanol: "gastar/pasar (tiempo)" },
+    { infinitivo: "stand", pasadoSimple: "stood", participio: "stood", espanol: "estar de pie" },
+    { infinitivo: "steal", pasadoSimple: "stole", participio: "stolen", espanol: "robar" },
+    { infinitivo: "swim", pasadoSimple: "swam", participio: "swum", espanol: "nadar" },
+    { infinitivo: "take", pasadoSimple: "took", participio: "taken", espanol: "tomar/coger" },
+    { infinitivo: "teach", pasadoSimple: "taught", participio: "taught", espanol: "enseñar" },
+    { infinitivo: "tell", pasadoSimple: "told", participio: "told", espanol: "contar/decir" },
+    { infinitivo: "think", pasadoSimple: "thought", participio: "thought", espanol: "pensar" },
+    { infinitivo: "throw", pasadoSimple: "threw", participio: "thrown", espanol: "lanzar" },
+    { infinitivo: "understand", pasadoSimple: "understood", participio: "understood", espanol: "entender" },
+    { infinitivo: "wake", pasadoSimple: "woke", participio: "woken", espanol: "despertar" },
+    { infinitivo: "wear", pasadoSimple: "wore", participio: "worn", espanol: "llevar puesto" },
+    { infinitivo: "win", pasadoSimple: "won", participio: "won", espanol: "ganar" },
+    { infinitivo: "write", pasadoSimple: "wrote", participio: "written", espanol: "escribir" },
+    { infinitivo: "become", pasadoSimple: "became", participio: "become", espanol: "llegar a ser" },
+    { infinitivo: "bend", pasadoSimple: "bent", participio: "bent", espanol: "doblar" },
+    { infinitivo: "bet", pasadoSimple: "bet", participio: "bet", espanol: "apostar" },
+    { infinitivo: "bind", pasadoSimple: "bound", participio: "bound", espanol: "atar/vendar" },
+    { infinitivo: "bite", pasadoSimple: "bit", participio: "bitten", espanol: "morder" },
+    { infinitivo: "blow", pasadoSimple: "blew", participio: "blown", espanol: "soplar" },
+    { infinitivo: "burn", pasadoSimple: "burned/burnt", participio: "burned/burnt", espanol: "quemar" },
+    { infinitivo: "deal", pasadoSimple: "dealt", participio: "dealt", espanol: "tratar" },
+    { infinitivo: "dig", pasadoSimple: "dug", participio: "dug", espanol: "cavar" },
+    { infinitivo: "draw", pasadoSimple: "drew", participio: "drawn", espanol: "dibujar" },
+    { infinitivo: "forget", pasadoSimple: "forgot", participio: "forgotten", espanol: "olvidar" },
+    { infinitivo: "forgive", pasadoSimple: "forgave", participio: "forgiven", espanol: "perdonar" },
+    { infinitivo: "freeze", pasadoSimple: "froze", participio: "frozen", espanol: "congelar" },
+    { infinitivo: "hang", pasadoSimple: "hung", participio: "hung", espanol: "colgar" },
+    { infinitivo: "hit", pasadoSimple: "hit", participio: "hit", espanol: "golpear" },
+    { infinitivo: "kneel", pasadoSimple: "knelt", participio: "knelt", espanol: "arrodillarse" },
+    { infinitivo: "light", pasadoSimple: "lit/lighted", participio: "lit/lighted", espanol: "encender" },
+    { infinitivo: "mean", pasadoSimple: "meant", participio: "meant", espanol: "significar" },
+    { infinitivo: "mistake", pasadoSimple: "mistook", participio: "mistaken", espanol: "equivocarse" },
+    { infinitivo: "overcome", pasadoSimple: "overcame", participio: "overcome", espanol: "superar" },
+    { infinitivo: "prove", pasadoSimple: "proved", participio: "proven/proved", espanol: "probar/demostrar" },
+    { infinitivo: "quit", pasadoSimple: "quit", participio: "quit", espanol: "abandonar" },
+    { infinitivo: "seek", pasadoSimple: "sought", participio: "sought", espanol: "buscar" },
+    { infinitivo: "shake", pasadoSimple: "shook", participio: "shaken", espanol: "agitar" },
+    { infinitivo: "sink", pasadoSimple: "sank", participio: "sunk", espanol: "hundir" },
+    { infinitivo: "slide", pasadoSimple: "slid", participio: "slid", espanol: "deslizar" },
+    { infinitivo: "strike", pasadoSimple: "struck", participio: "struck/stricken", espanol: "golpear" },
+    { infinitivo: "swear", pasadoSimple: "swore", participio: "sworn", espanol: "jurar" },
+    { infinitivo: "tear", pasadoSimple: "tore", participio: "torn", espanol: "rasgar" },
+    { infinitivo: "upset", pasadoSimple: "upset", participio: "upset", espanol: "molestar" }
+];
+
+        let verboActual = null;
+        let tipoDePreguntaActual = null; // 'infinitivo', 'pasadoSimple', 'participio', 'espanol'
+
+        // Referencias a los elementos del DOM
+        const preguntaValorElem = document.getElementById('pregunta-valor');
+        const tipoPreguntaElem = document.getElementById('tipo-pregunta');
+        const infinitivoInput = document.getElementById('infinitivo');
+        const pasadoSimpleInput = document.getElementById('pasadoSimple');
+        const participioInput = document.getElementById('participio');
+        const espanolInput = document.getElementById('espanol');
+        const comprobarBtn = document.getElementById('comprobarBtn');
+        const siguienteBtn = document.getElementById('siguienteBtn');
+        const feedbackElem = document.getElementById('feedback');
+
+        // Función para normalizar la entrada del usuario y la respuesta (ignorar mayúsculas/minúsculas y espacios extra)
+        function normalizar(texto) {
+            if (!texto) return '';
+            return texto.toLowerCase().trim().replace(/\s+/g, ' '); // Reemplaza múltiples espacios por uno solo
+        }
+
+        // Función para verificar si una respuesta de usuario es correcta (maneja 'was/were' y 'got/gotten')
+        function esRespuestaCorrecta(respuestaUsuario, respuestaCorrecta) {
+            const respuestasPosibles = respuestaCorrecta.split('/').map(normalizar);
+            return respuestasPosibles.includes(normalizar(respuestaUsuario));
+        }
+
+        function generarPregunta() {
+            // 1. Elegir un verbo aleatorio
+            const indiceAleatorio = Math.floor(Math.random() * verbosIrregulares.length);
+            verboActual = verbosIrregulares[indiceAleatorio];
+
+            // 2. Elegir qué forma del verbo se va a dar (infinitivo, pasadoSimple, participio, español)
+            const tipos = ['infinitivo', 'pasadoSimple', 'participio', 'espanol'];
+            tipoDePreguntaActual = tipos[Math.floor(Math.random() * tipos.length)];
+
+            // 3. Resetear campos y feedback
+            infinitivoInput.value = '';
+            pasadoSimpleInput.value = '';
+            participioInput.value = '';
+            espanolInput.value = '';
+            feedbackElem.textContent = '';
+
+            // 4. Habilitar todos los campos y luego deshabilitar el que se está dando
+            infinitivoInput.disabled = false;
+            pasadoSimpleInput.disabled = false;
+            participioInput.disabled = false;
+            espanolInput.disabled = false;
+
+            // Limpiar las clases de correcto/incorrecto
+            infinitivoInput.classList.remove('correcto', 'incorrecto');
+            pasadoSimpleInput.classList.remove('correcto', 'incorrecto');
+            participioInput.classList.remove('correcto', 'incorrecto');
+            espanolInput.classList.remove('correcto', 'incorrecto');
+
+
+            comprobarBtn.style.display = 'block';
+            siguienteBtn.style.display = 'none';
+
+            // 5. Mostrar la pregunta y deshabilitar el campo correspondiente
+            switch (tipoDePreguntaActual) {
+                case 'infinitivo':
+                    preguntaValorElem.textContent = verboActual.infinitivo;
+                    tipoPreguntaElem.textContent = "Te doy el Infinitivo:";
+                    infinitivoInput.value = verboActual.infinitivo;
+                    infinitivoInput.disabled = true;
+                    pasadoSimpleInput.focus(); // Poner foco en el primer campo a rellenar
+                    break;
+                case 'pasadoSimple':
+                    preguntaValorElem.textContent = verboActual.pasadoSimple;
+                    tipoPreguntaElem.textContent = "Te doy el Pasado Simple:";
+                    pasadoSimpleInput.value = verboActual.pasadoSimple;
+                    pasadoSimpleInput.disabled = true;
+                    infinitivoInput.focus();
+                    break;
+                case 'participio':
+                    preguntaValorElem.textContent = verboActual.participio;
+                    tipoPreguntaElem.textContent = "Te doy el Participio:";
+                    participioInput.value = verboActual.participio;
+                    participioInput.disabled = true;
+                    infinitivoInput.focus();
+                    break;
+                case 'espanol':
+                    preguntaValorElem.textContent = verboActual.espanol;
+                    tipoPreguntaElem.textContent = "Te doy el Español:";
+                    espanolInput.value = verboActual.espanol;
+                    espanolInput.disabled = true;
+                    infinitivoInput.focus();
+                    break;
+            }
+        }
+
+        function comprobarRespuestas() {
+            let todasCorrectas = true;
+
+            // Comprobar infinitivo (si no fue el tipo de pregunta)
+            if (tipoDePreguntaActual !== 'infinitivo') {
+                if (esRespuestaCorrecta(infinitivoInput.value, verboActual.infinitivo)) {
+                    infinitivoInput.classList.add('correcto');
+                } else {
+                    infinitivoInput.classList.add('incorrecto');
+                    todasCorrectas = false;
+                }
+            }
+
+            // Comprobar pasado simple (si no fue el tipo de pregunta)
+            if (tipoDePreguntaActual !== 'pasadoSimple') {
+                if (esRespuestaCorrecta(pasadoSimpleInput.value, verboActual.pasadoSimple)) {
+                    pasadoSimpleInput.classList.add('correcto');
+                } else {
+                    pasadoSimpleInput.classList.add('incorrecto');
+                    todasCorrectas = false;
+                }
+            }
+
+            // Comprobar participio (si no fue el tipo de pregunta)
+            if (tipoDePreguntaActual !== 'participio') {
+                if (esRespuestaCorrecta(participioInput.value, verboActual.participio)) {
+                    participioInput.classList.add('correcto');
+                } else {
+                    participioInput.classList.add('incorrecto');
+                    todasCorrectas = false;
+                }
+            }
+
+            // Comprobar español (si no fue el tipo de pregunta)
+            if (tipoDePreguntaActual !== 'espanol') {
+                if (esRespuestaCorrecta(espanolInput.value, verboActual.espanol)) {
+                    espanolInput.classList.add('correcto');
+                } else {
+                    espanolInput.classList.add('incorrecto');
+                    todasCorrectas = false;
+                }
+            }
+
+            if (todasCorrectas) {
+                feedbackElem.textContent = "¡Correcto! Todas las respuestas son válidas.";
+                feedbackElem.style.color = 'green';
+            } else {
+                feedbackElem.innerHTML = `
+                    <p style="color: red;">¡Incorrecto! Repasa las siguientes formas:</p>
+                    <p>Infinitivo: <strong>${verboActual.infinitivo}</strong></p>
+                    <p>Pasado Simple: <strong>${verboActual.pasadoSimple}</strong></p>
+                    <p>Participio: <strong>${verboActual.participio}</strong></p>
+                    <p>Español: <strong>${verboActual.espanol}</strong></p>
+                `;
+            }
+
+            // Deshabilitar campos y botones y mostrar botón siguiente
+            infinitivoInput.disabled = true;
+            pasadoSimpleInput.disabled = true;
+            participioInput.disabled = true;
+            espanolInput.disabled = true;
+            comprobarBtn.style.display = 'none';
+            siguienteBtn.style.display = 'block';
+        }
+
+        // Event Listeners
+        comprobarBtn.addEventListener('click', comprobarRespuestas);
+        siguienteBtn.addEventListener('click', generarPregunta);
+
+        // Generar la primera pregunta al cargar la página
+        document.addEventListener('DOMContentLoaded', generarPregunta);
+    </script>
+</body>
+</html>
